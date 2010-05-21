@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project xmlns:pom="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.logiclander.jaasmine</groupId>
+  <artifactId>jaasmine-parent</artifactId>
+  <name>jaasmine-parent</name>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <url>http://maven.apache.org</url>
+  <modules>
+    <module>jaasmine-core</module>
+  </modules>
+  <dependencies/>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+</project>

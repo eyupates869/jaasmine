@@ -6,6 +6,7 @@ package com.logiclander.jaasmine;
 
 import static com.logiclander.jaasmine.JAASMineContants.*;
 
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
@@ -24,7 +25,8 @@ public class SPNegoManager {
 
   private final GSSContext gssContext;
 
-  public SPNegoManager(Subject subject, String spn, AuthenticationType type) throws Exception {
+  public SPNegoManager(Subject subject, String spn, AuthenticationType type)
+          throws GSSException, PrivilegedActionException {
     // create a GSS Credential from a Subject that has Kerberos ticket(s)
     final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
     final GSSManager gssManager = GSSManager.getInstance();

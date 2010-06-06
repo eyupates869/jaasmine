@@ -21,11 +21,11 @@ import org.ietf.jgss.Oid;
  *
  * @author tcarroll
  */
-public class SPNegoManager {
+public class SPNegoClient {
 
   private final GSSContext gssContext;
 
-  public SPNegoManager(Subject subject, String spn, AuthenticationType type)
+  public SPNegoClient(Subject subject, String spn, AuthenticationType type)
           throws GSSException, PrivilegedActionException {
     // create a GSS Credential from a Subject that has Kerberos ticket(s)
     final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
@@ -36,10 +36,28 @@ public class SPNegoManager {
     GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
     //GSSName gssServerName = manager.createName(spn,GSSName.NT_HOSTBASED_SERVICE,spnegoMechOid);
     gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssClientCred, GSSContext.DEFAULT_LIFETIME);
-    // enable GSS credential delegation
-    gssContext.requestCredDeleg(true);
-    // enable mutual authentication with server
-    // context.requestMutualAuth(true);
+    // enable GSS credential delegation by default
+    setCredentialDelegationState(true);
+    // enable mutual authentication with server by default (keytab required)
+    setMutualAuthenticationState(true);
+  }
+
+  public boolean getCredentialDelegationState() {
+    return gssContext.getCredDelegState();
+  }
+
+  // must be set prior to (initSecContext) generating first SPNegoToken
+  public void setCredentialDelegationState(boolean state) throws GSSException {
+    gssContext.requestCredDeleg(state);
+  }
+
+  public boolean getMutualAuthenticationState() {
+    return gssContext.getMutualAuthState();
+  }
+
+  // must be set prior to (initSecContext) generating first SPNegoToken
+  public void setMutualAuthenticationState(boolean state) throws GSSException {
+    gssContext.requestMutualAuth(state);
   }
 
   public void dispose() throws GSSException {

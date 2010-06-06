@@ -11,5 +11,4 @@ package com.logiclander.jaasmine;
 public class JAASMineContants {
 
   public static final String SPNEGO_MECH_OID = "1.3.6.1.5.5.2";
-//  public static final String KRB5_MECH_OID = "1.2.840.113554.1.2.2";
 }

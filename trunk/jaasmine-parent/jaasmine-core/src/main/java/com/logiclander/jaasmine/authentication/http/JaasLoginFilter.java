@@ -23,6 +23,7 @@ import javax.security.auth.Subject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -36,12 +37,17 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author agherna
  */
-public class SPNegoLoginFilter implements Filter {
+public class JaasLoginFilter implements Filter {
 
 
-    private Log logger = LogFactory.getLog(SPNegoLoginFilter.class);
+    private final Log logger = LogFactory.getLog(JaasLoginFilter.class);
+
+    private static final String DEFAULT_NAMED_LOGIN_DISPATCHER =
+            "JaasLoginServlet";
 
     private String appName;
+
+    private String loginServletName;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -49,6 +55,11 @@ public class SPNegoLoginFilter implements Filter {
         appName = filterConfig.getInitParameter("appName");
         if (appName == null || appName.isEmpty()) {
             appName = AuthenticationService.DEFAULT_JAAS_SPNEGO_CONFIG;
+        }
+
+        loginServletName = filterConfig.getInitParameter("loginServletName");
+        if (loginServletName == null || loginServletName.isEmpty()) {
+            loginServletName = DEFAULT_NAMED_LOGIN_DISPATCHER;
         }
 
         if (logger.isDebugEnabled()) {
@@ -87,9 +98,23 @@ public class SPNegoLoginFilter implements Filter {
 
                 } else {
 
-                    if (!httpResp.isCommitted()) {
-                        httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    RequestDispatcher loginDispatcher =
+                        httpReq.getSession()
+                            .getServletContext()
+                            .getNamedDispatcher(loginServletName);
+
+                    if (loginDispatcher != null) {
+
+                        loginDispatcher.forward(httpReq, httpResp);
                         return;
+
+                    } else {
+
+                        String msg =
+                            String.format("Servlet %s is not configured",
+                                loginServletName);
+                        throw new ServletException(msg);
+
                     }
                     
                 }
@@ -123,16 +148,8 @@ public class SPNegoLoginFilter implements Filter {
 
     private boolean hasCredentials(HttpServletRequest req) {
 
-        boolean subjectSet = false;
-        boolean spnegoTokenPresent = false;
+        return hasSubject(req);
 
-        subjectSet = hasSubject(req);
-
-        if (!subjectSet) {
-            spnegoTokenPresent = hasValidSPNegoToken(req);
-        }
-
-        return (subjectSet || spnegoTokenPresent);
     }
 
 
@@ -147,13 +164,6 @@ public class SPNegoLoginFilter implements Filter {
             (Subject) sess.getAttribute(AuthenticationService.SUBJECT_KEY);
 
         return (subj != null);
-    }
-
-
-    private boolean hasValidSPNegoToken(HttpServletRequest req) {
-
-        // TODO: implement
-        return false;
     }
 
 

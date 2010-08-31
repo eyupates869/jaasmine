@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ Copyright 2010 LogicLander
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <display-name>jaasmine-test</display-name>
+    
+    <!-- 
+     JaasLoginFilter: filters incoming requests for a 
+     javax.security.auth.Subject set on the HttpSession.  If found, access to 
+     the resource is granted.  Otherwise, access is denied and the request is
+     sent to JaasLoginServlet.
+
+     Note: this Filter can take 2 init-params:
+     * appName: 
+         the name of an application in the JAAS configuration file.  The JAAS
+         configuration file name is set by the java.security.auth.login.config
+         System property.  The default is value is jaasmine.spnego.login
+                
+
+     * loginServletName: 
+         The value of a servlet-name in this web.xml file that will process the 
+                         login.  The default is JaasLoginServlet.
+    -->
+    <filter>
+        <filter-name>JaasLoginFilter</filter-name>
+        <filter-class>com.logiclander.jaasmine.authentication.http.JaasLoginFilter</filter-class>
+    </filter>
+    
+    <!-- Send all requests through JaasLoginFilter -->
+    <filter-mapping>
+        <filter-name>JaasLoginFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <!-- 
+      Configured as the default servlet to use for Login.  See the source code
+      of com.logiclander.jaasmine.authentication.http.JaasLoginFilter for more
+      details.
+
+      Do not change the name of this servlet unless you add an init-param
+      appName whose value is the same as the servlet-name below.  See the
+      comments for JaasLoginFilter.
+    -->
+    <servlet>
+        <servlet-name>JaasLoginServlet</servlet-name>
+        <servlet-class>com.logiclander.jaasminetest.LoginCheckServlet</servlet-class>
+    </servlet>
+
+    <!--
+     Logs out the Subject.  This Servlet is included in the jaasmine-core
+     library.
+    -->
+    <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>com.logiclander.jaasmine.authentication.http.SimpleLogoutServlet</servlet-class>
+    </servlet>
+
+    <!-- Shows a page with the logged in Subject information printed. -->
+    <servlet>
+        <servlet-name>AboutYouServlet</servlet-name>
+        <servlet-class>com.logiclander.jaasminetest.AboutYouServlet</servlet-class>
+    </servlet>
+
+    <!-- Requests from AboutYouServlet are dispatched to this JSP. -->
+    <servlet>
+        <servlet-name>AboutYouJsp</servlet-name>
+        <jsp-file>/WEB-INF/jsp/aboutyou.jsp</jsp-file>
+    </servlet>
+
+    <!--
+     This is the Home page for this web application.  It will only be displayed
+     if there is a logged in Subject.
+    -->
+    <servlet>
+        <servlet-name>Home</servlet-name>
+        <jsp-file>/WEB-INF/jsp/index.jsp</jsp-file>
+    </servlet>
+
+    <!--
+     Servlet mappings should not be changed in this web application because
+     the paths are hard-coded into the JSPs.
+    -->
+    <servlet-mapping>
+        <servlet-name>JaasLoginServlet</servlet-name>
+        <url-pattern>/Login</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/Logout</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AboutYouServlet</servlet-name>
+        <url-pattern>/AboutYou</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>JaasLoginServlet</servlet-name>
+        <url-pattern>/Login</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Home</servlet-name>
+        <url-pattern>/index.html</url-pattern>
+        <url-pattern>/index.jsp</url-pattern>
+        <url-pattern>/Home</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>/WEB-INF/jsp/index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>

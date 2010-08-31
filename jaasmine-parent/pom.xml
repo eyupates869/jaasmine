@@ -9,6 +9,7 @@
   <url>http://maven.apache.org</url>
   <modules>
     <module>jaasmine-core</module>
+    <module>jaasmine-example-webapp</module>
   </modules>
   <dependencies/>
   <properties>

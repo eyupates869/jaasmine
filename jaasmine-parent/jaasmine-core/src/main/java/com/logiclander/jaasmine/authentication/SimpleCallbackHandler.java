@@ -24,16 +24,27 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
 /**
- *
- * @author agherna
+ * CallbackHandler implementation for {@link SimpleAuthenticationService}.
  */
 class SimpleCallbackHandler implements CallbackHandler {
 
 
+    /** The userId. */
     private final String userId;
 
+
+    /** The password. */
     private final char[] password;
 
+
+    /**
+     * Constructs a new SimpleCallbackHandler.
+     *
+     * @param userId the User's ID to process in
+     * {@link #handle(javax.security.auth.callback.Callback[]) handle}
+     * @param password the User's password to process in
+     * {@link #handle(javax.security.auth.callback.Callback[]) handle}
+     */
     SimpleCallbackHandler(String userId, char[] password) {
         this.userId = userId;
         this.password = password;

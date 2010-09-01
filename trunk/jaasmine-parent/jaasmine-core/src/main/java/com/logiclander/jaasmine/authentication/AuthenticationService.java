@@ -19,29 +19,34 @@ package com.logiclander.jaasmine.authentication;
 import javax.security.auth.Subject;
 
 /**
- * Implementations will authenticate users and return
- * {@link javax.security.auth.Subject Subjects}.
- *
- * @author agherna
+ * Manages authentication lifecycle and provides standard names for keys used
+ * by jaasmine services.
  */
 public interface AuthenticationService {
 
     /**
      * A key that can be associated with the Subject returned by
-     * {@link #authenticate(java.lang.String, char[])  authenticate}.
+     * {@link #login(java.lang.String, char[]) login}.
      */
     public static final String SUBJECT_KEY =
             "__com.logiclander.jaasmine.authentication.SUBJECT";
 
+
+    /**
+     * The default application name for a configuration used by JAAS during the
+     * authentication process.
+     */
     public static final String DEFAULT_JAAS_SPNEGO_CONFIG =
             "jaasmine.spnego.login";
 
+    
     /**
      * Returns the Subject for the given credentials or null if the login fails
      * fails.
      *
      * @param userId the user's ID
      * @param password the password
+     * @return the Subject associated with the supplied credentials
      */
     public Subject login(String userId, char[] password);
 

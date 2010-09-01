@@ -30,17 +30,46 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
+ * Checks incoming ServletRequests and ServletResponses for authentication.
  *
- * @author agherna
+ * This filter accepts the following init-params:
+ * <UL>
+ *  <LI>appName - the name of the application in the JAAS configuration.  This
+ * parameter is optional.  The default value is
+ * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}</LI>
+ * </UL>
+ *
+ * Requests that invoke this Filter must have a {@code Authorization} header
+ * and a {@code Negotiate} scheme with a valid SPNego token.  If any of these
+ * requirements fail, then this Filter returns an HTTP 401 - Unauthorized with
+ * a {@code WWW-Authenticate} header.
+ *
+ * Instances of this class have a configurable commons-logging based logger
+ * named
+ * {@code com.logiclander.jaasmine.authentication.http.SPNegoFilter}.
  */
 
 //TODO - do we need to think about being able to generate Subjects in SSO situations?
 public class SPNegoFilter implements Filter {
 
-    private final Log logger = LogFactory.getLog(SPNegoFilter.class);
+    /** The logger for this instance. */
+    private transient final Log logger = LogFactory.getLog(SPNegoFilter.class);
 
+
+    /**
+     * The application name for the configuration to use in the JAAS file.  The
+     * default value is
+     * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}.
+     */
     private String appName;
 
+
+    /**
+     * {@inheritDoc}
+     *
+     * Checks the given FilterConfig for the init-param named appName.  If this
+     * value is not in the FilterConfig, then the default value is used.
+     */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -54,6 +83,31 @@ public class SPNegoFilter implements Filter {
         }
     }
 
+
+    /**
+     * This implementation will filter requests for credentials and determine if
+     * processing of the FilterChain can proceed.  Filtering occurs as follows:
+     * <OL>
+     *  <LI>If the request is not an HttpServletRequest and the response is not
+     * an HttpServletResponse, continue processing the filter chain (this almost
+     * never happens)</LI>
+     *  <LI>The HttpServletRequest is checked for a {@code WWW-Authenticate}
+     * request header.  If found, it is checked for the scheme used, which must
+     * be set to {@code Negotiate}.</LI>
+     *  <LI>If found, the SPNego token is decoded and validated.  If it is 
+     * valid, processing is allowed to continue.  If not, processing will stop 
+     * and an HTTP 401 is returned with a {@code WWW-Authenticate} request 
+     * header set to {@code Negotiate}.</LI>
+     *  <LI>If the request header is not found, an HTTP 401 is returned with a
+     * {@code WWW-Authenticate} request header set to {@code Negotiate}.</LI>
+     * </OL>
+     *
+     * @param request the ServletRequest
+     * @param response the ServletResponse
+     * @param chain the FilterChain
+     * @throws IOException if an I/O error occurs in the FilterChain
+     * @throws ServletException if a processing error occurs in the FilterChain
+     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, 
             FilterChain chain) throws IOException, ServletException {
@@ -89,13 +143,10 @@ public class SPNegoFilter implements Filter {
     }
 
 
-    private boolean hasValidSPNegoToken(HttpServletRequest req) {
-
-        // TODO: implement
-        return false;
-    }
-
-
+    /**
+     * Writes a log message using the configured logger at DEBUG level stating
+     * that the Filter is destroyed.
+     */
     @Override
     public void destroy() {
 
@@ -106,8 +157,23 @@ public class SPNegoFilter implements Filter {
     }
 
 
+    /**
+     * @return the String representation of this JaasLoginFilter.
+     */
+    @Override
     public String toString() {
         return String.format("%s for %s", this.getClass().getSimpleName(),
                 appName);
+    }
+
+
+    /**
+     * @param req the HttpServletRequest
+     * @return true if a valid SPNego token is on the request.
+     */
+    private boolean hasValidSPNegoToken(HttpServletRequest req) {
+
+        // TODO: implement
+        return false;
     }
 }

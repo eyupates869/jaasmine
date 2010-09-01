@@ -29,23 +29,35 @@ import org.apache.commons.logging.LogFactory;
  * {@link javax.security.auth.callback.CallbackHandler CallbackHandler}.
  *
  * Instances of this class have a configurable commons-logging based logger
- * named {@code com.logiclander.jaasmine.authentication.DefaultLoginService}.
- *
- * @author agherna
+ * named 
+ * {@code com.logiclander.jaasmine.authentication.SimpleAuthenticationService}.
  */
 public class SimpleAuthenticationService implements AuthenticationService {
 
+
+    /** The JAAS configuration to use for this instance. */
     private final String applicationName;
 
-    private final Log logger =
+
+    /** The logger for this instance. */
+    private transient final Log logger =
             LogFactory.getLog(SimpleAuthenticationService.class);
 
 
+    /**
+     * Constructs a new SimpleAuthenticationService that will use the
+     * configuration under the given application name in the JAAS configuration.
+     *
+     * @param applicationName the application name
+     */
     public SimpleAuthenticationService(String applicationName) {
         this.applicationName = applicationName;
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Subject login(String userId, char[] password) {
 
@@ -73,6 +85,10 @@ public class SimpleAuthenticationService implements AuthenticationService {
         return s;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void logout(Subject s) {
 
@@ -93,13 +109,30 @@ public class SimpleAuthenticationService implements AuthenticationService {
     }
 
 
+    /**
+     * The String representation of this SimpleAuthenticationService.
+     *
+     * @return the String representation of this SimpleAuthenticationService.
+     */
     @Override
     public String toString() {
-        return String.format("SimpleAuthenticationService for %s",
+        return String.format("%s for %s", getClass().getSimpleName(),
                 applicationName);
     }
 
 
+    /**
+     * Compares the specified Object with this SimpleAuthenticationService for
+     * equality.  Returns true if the object is also a
+     * SimpleAuthenticationService and the two SimpleAuthenticationService
+     * instances are equivalent.  More formally, two SimpleAuthenticationService
+     * instances are equal if their application names are equal.
+     *
+     * @param obj Object to be compared with this SimpleAuthenticationService
+     * for equality.
+     * @return true if the specified Object is equal to this
+     * SimpleAuthenticationService.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -108,18 +141,26 @@ public class SimpleAuthenticationService implements AuthenticationService {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SimpleAuthenticationService other = (SimpleAuthenticationService) obj;
-        if ((this.applicationName == null) ? (other.applicationName != null) : !this.applicationName.equals(other.applicationName)) {
+        final SimpleAuthenticationService other =
+                (SimpleAuthenticationService) obj;
+        if ((this.applicationName == null) ? (other.applicationName != null) :
+            !this.applicationName.equals(other.applicationName)) {
             return false;
         }
         return true;
     }
 
 
+    /**
+     * Returns a hashcode for this SimpleAuthenticationService.
+     *
+     * @return a hashcode for this SimpleAuthenticationService.
+     */
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + (this.applicationName != null ? this.applicationName.hashCode() : 0);
+        hash = 97 * hash + (this.applicationName != null ?
+            this.applicationName.hashCode() : 0);
         return hash;
     }
 

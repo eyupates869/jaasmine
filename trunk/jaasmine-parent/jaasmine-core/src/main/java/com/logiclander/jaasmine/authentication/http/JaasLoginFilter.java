@@ -34,21 +34,61 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
+ * Checks incoming ServletRequests and ServletResponses for authentication.
  *
- * @author agherna
+ * This filter accepts the following init-params:
+ * <UL>
+ *  <LI>appName - the name of the application in the JAAS configuration.  This
+ * parameter is optional.  The default value is
+ * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}</LI>
+ *  <LI>loginServletName - the name of the Servlet that will be used to
+ * collect user credentials.  This parameter is optional.  The default value is
+ * {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}</LI>
+ * </UL>
+ *
+ * Requests that invoke this Filter must have parameters named {@code username}
+ * and {@code password} set, otherwise the request cannot be processed.  This
+ * Filter processes logins using the {@link SimpleAuthenticationService}.
+ *
+ * Instances of this class have a configurable commons-logging based logger
+ * named
+ * {@code com.logiclander.jaasmine.authentication.http.JaasLoginFilter}.
  */
 public class JaasLoginFilter implements Filter {
 
 
-    private final Log logger = LogFactory.getLog(JaasLoginFilter.class);
+    /** The logger for this instance. */
+    private transient final Log logger =
+            LogFactory.getLog(JaasLoginFilter.class);
 
+
+    /** The default value for the appName, which is {@value}.*/
     private static final String DEFAULT_NAMED_LOGIN_DISPATCHER =
             "JaasLoginServlet";
 
+
+    /**
+     * The application name for the configuration to use in the JAAS file.  The
+     * default value is
+     * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}.
+     */
     private String appName;
 
+
+    /**
+     * The name of the Servlet to use for post login processing.  The default
+     * value is {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}.
+     */
     private String loginServletName;
 
+
+    /**
+     * {@inheritDoc}
+     *
+     * Checks the given FilterConfig for the init-params named appName and
+     * loginServletName.  If these values are not in the FilterConfig, then
+     * the default values are used.
+     */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -68,6 +108,34 @@ public class JaasLoginFilter implements Filter {
 
     }
 
+
+    /**
+     * This implementation will filter requests for credentials and determine if
+     * processing of the FilterChain can proceed.  Filtering occurs as follows:
+     * <OL>
+     *  <LI>If the request is not an HttpServletRequest and the response is not
+     * an HttpServletResponse, continue processing the filter chain (this almost
+     * never happens)</LI>
+     *  <LI>The HttpSession is checked for an attribute named
+     * {@link AuthenticationService#SUBJECT_KEY AuthenticationService.SUBJECT_KEY}</LI>
+     *  <LI>If found, then processing the filter chain continues.</LI>
+     *  <LI>If not found, then the request is checked for the {@code username}
+     * and {@code password} parameters.  If these parameters are present, then
+     * the SimpleAuthenticationService's login method is invoked with those
+     * credentials.</LI>
+     *  <LI>If a Subject is returned, it is saved to the HttpSession with the
+     * key from above.</LI>
+     *  <LI>If a Subject is not returned, the filter will dispatch to a Servlet
+     * configured in the {@code web.xml} for the web application with the
+     * servlet-name {@code JaasLoginServlet}.</LI>
+     * </OL>
+     *
+     * @param request the ServletRequest
+     * @param response the ServletResponse
+     * @param chain the FilterChain
+     * @throws IOException if an I/O error occurs in the FilterChain
+     * @throws ServletException if a processing error occurs in the FilterChain
+     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, 
             FilterChain chain) throws IOException, ServletException {
@@ -146,6 +214,34 @@ public class JaasLoginFilter implements Filter {
     }
 
 
+    /**
+     * Writes a log message using the configured logger at DEBUG level stating
+     * that the Filter is destroyed.
+     */
+    @Override
+    public void destroy() {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%s destroyed", toString()));
+        }
+
+    }
+
+
+    /**
+     * @return the String representation of this JaasLoginFilter.
+     */
+    @Override
+    public String toString() {
+        return String.format("%s for %s", this.getClass().getSimpleName(),
+                appName);
+    }
+
+
+    /**
+     * @param req an HttpServletRequest
+     * @return true if the credentials are present on the request.
+     */
     private boolean hasCredentials(HttpServletRequest req) {
 
         return hasSubject(req);
@@ -153,6 +249,10 @@ public class JaasLoginFilter implements Filter {
     }
 
 
+    /**
+     * @param req an HttpServletRequest
+     * @return true if the Subject is found on the request.
+     */
     private boolean hasSubject(HttpServletRequest req) {
 
         HttpSession sess = req.getSession(false);
@@ -167,6 +267,10 @@ public class JaasLoginFilter implements Filter {
     }
 
 
+    /**
+     * @param request the HttpServletRequest.
+     * @return true if the Subject is obtained from the SimpleLoginService.
+     */
     private boolean login(HttpServletRequest request) {
 
         String username = request.getParameter("username");
@@ -202,22 +306,5 @@ public class JaasLoginFilter implements Filter {
         }
         
         return subjectObtained;
-    }
-
-
-    @Override
-    public void destroy() {
-
-        if (logger.isDebugEnabled()) {
-            logger.debug(String.format("%s destroyed", toString()));
-        }
-
-    }
-
-
-    @Override
-    public String toString() {
-        return String.format("%s for %s", this.getClass().getSimpleName(),
-                appName);
     }
 }

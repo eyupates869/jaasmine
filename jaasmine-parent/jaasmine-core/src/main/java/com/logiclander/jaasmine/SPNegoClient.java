@@ -47,16 +47,6 @@ public class SPNegoClient {
     gssClientCred = (GSSCredential) Subject.doAs(subject, new CredentialGenerator(gssManager, type.getOidValue()));
   }
 
-  public SPNegoClient(String spnegoToken)
-          throws GSSException {
-    // create a GSS Credential using a SPNegoToken from an authentication header
-    final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
-    GSSContext gssContext = gssManager.createContext(gssServerCred);
-
-    byte[] requestToken = Base64.decodeBase64(spnegoToken);
-    byte[] responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
-  }
-
   public boolean getCredentialDelegationState() {
     return credentialDelegationState;
   }

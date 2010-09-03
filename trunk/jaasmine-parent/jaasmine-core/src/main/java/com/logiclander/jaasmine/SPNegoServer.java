@@ -39,6 +39,7 @@ public class SPNegoServer {
   private final byte[] responseToken;
   private final boolean isValidToken;
   private final boolean canDelegateToken;
+  private final GSSCredential delegated;
 
   public SPNegoServer(String spnegoToken)
           throws GSSException {
@@ -50,6 +51,11 @@ public class SPNegoServer {
     responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
     isValidToken = gssContext.isEstablished();
     canDelegateToken = gssContext.getCredDelegState();
+    if (canDelegateToken) {
+        delegated = gssContext.getDelegCred();
+    } else {
+        delegated = null;
+    }
   }
 
   public boolean isValidToken() {
@@ -60,9 +66,14 @@ public class SPNegoServer {
     return canDelegateToken;
   }
 
+  public GSSCredential getDelegatedCredential() {
+     return delegated;
+  }
+
   public byte[] generateDelegateToken(String endpointSPN, boolean allowFurtherDelegation)
          throws GSSException {
-    if(!canDelegateToken()) {
+//    if(!canDelegateToken()) {
+     if (delegated == null) {
       return EMPTY_BYTE_ARRAY;
     }
 

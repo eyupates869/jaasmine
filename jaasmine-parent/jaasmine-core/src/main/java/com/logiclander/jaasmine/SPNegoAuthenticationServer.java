@@ -47,6 +47,7 @@ public class SPNegoAuthenticationServer {
     /** The GSSCredential for this instance. */
     private transient final GSSCredential sPNegoServerCred;
 
+
     /** The object identity for this instance.*/
     private transient final Oid sPNegoOid;
 
@@ -96,23 +97,34 @@ public class SPNegoAuthenticationServer {
             return null;
         }
 
-        GSSContext context = manager.createContext(sPNegoServerCred);
+        GSSContext context = null;
 
-        peerToken = context.acceptSecContext(token, 0, token.length);
-        
-        if (!context.isEstablished()) {
-            logger.debug("Failed to establish context");
-            return null;
+        try {
+
+            context = manager.createContext(sPNegoServerCred);
+
+            peerToken = context.acceptSecContext(token, 0, token.length);
+
+            if (!context.isEstablished()) {
+                logger.debug("Failed to establish context");
+                return null;
+            }
+
+            String principal = context.getSrcName().toString();
+
+            GSSCredential delegated = null;
+            if (context.getCredDelegState()) {
+                delegated = context.getDelegCred();
+            }
+
+            return new SPNegoPrincipal(principal, delegated);
+
+        } finally {
+
+            if (context != null) {
+                context.dispose();
+            }
         }
-
-        String principal = context.getSrcName().toString();
-
-        GSSCredential delegated = null;
-        if (context.getCredDelegState()) {
-            delegated = context.getDelegCred();
-        }
-
-        return new SPNegoPrincipal(principal, delegated);
     }
 
 
@@ -157,24 +169,35 @@ public class SPNegoAuthenticationServer {
         }
 
         GSSName serverName = manager.createName(serverPrincipal, sPNegoOid);
-        GSSContext delegateContext =
-                manager.createContext(
+        GSSContext delegateContext = null;
+
+        try {
+
+            delegateContext = manager.createContext(
                     serverName,
                     sPNegoOid,
                     delegated,
                     GSSContext.DEFAULT_LIFETIME
                 );
-        delegateContext.requestCredDeleg(true);
+            delegateContext.requestCredDeleg(true);
         
-        byte[] delegatedToken = new byte[0];
-        delegatedToken =
+            byte[] delegatedToken = new byte[0];
+            delegatedToken =
                 delegateContext.initSecContext(
                     delegatedToken, 
                     0,
                     delegatedToken.length
                 );
 
-        return new String(Base64.encodeBase64(delegatedToken));
+            return new String(Base64.encodeBase64(delegatedToken));
+
+        } finally {
+
+            if (delegateContext != null) {
+                delegateContext.dispose();
+            }
+
+        }
     }
 
 

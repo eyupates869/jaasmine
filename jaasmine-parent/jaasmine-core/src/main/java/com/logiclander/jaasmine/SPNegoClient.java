@@ -22,6 +22,8 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -40,6 +42,7 @@ public class SPNegoClient {
   private final GSSCredential gssClientCred;
   private boolean credentialDelegationState = true;
   private boolean mutualAuthenticationState = true;
+    private final Log logger = LogFactory.getLog(SPNegoClient.class);
 
   public SPNegoClient(Subject subject, AuthenticationType type)
           throws GSSException, PrivilegedActionException {
@@ -73,21 +76,30 @@ public class SPNegoClient {
 
   public String generateSPNegoToken(String spn) throws GSSException {
     if (gssClientCred == null) {
+        logger.debug("No credential found, returning an empty String");
       return "";
     }
-    final GSSContext gssContext;
     byte[] spnegoToken = new byte[0];
-    // create target server Service Principal Name (SPN)
-    GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
-    //GSSName gssServerName = manager.createName(spn,GSSName.NT_HOSTBASED_SERVICE,spnegoMechOid);
-    // use the GSS Credential to create a SPNego Token for the target server
-    gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssClientCred, GSSContext.DEFAULT_LIFETIME);
-    gssContext.requestCredDeleg(credentialDelegationState);
-    gssContext.requestMutualAuth(mutualAuthenticationState);
-    spnegoToken = gssContext.initSecContext(spnegoToken, 0, spnegoToken.length);
-    gssContext.dispose();
-    // return SPNegoToken to be inserted it into the HTTP header
-    return new String(Base64.encodeBase64(spnegoToken));
+    GSSContext gssContext = null;
+
+    try {
+        // create target server Service Principal Name (SPN)
+        GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
+        //GSSName gssServerName = manager.createName(spn,GSSName.NT_HOSTBASED_SERVICE,spnegoMechOid);
+        // use the GSS Credential to create a SPNego Token for the target server
+        gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssClientCred, GSSContext.DEFAULT_LIFETIME);
+        gssContext.requestCredDeleg(credentialDelegationState);
+        gssContext.requestMutualAuth(mutualAuthenticationState);
+        spnegoToken = gssContext.initSecContext(spnegoToken, 0, spnegoToken.length);
+        // return SPNegoToken to be inserted it into the HTTP header
+        return new String(Base64.encodeBase64(spnegoToken));
+      } finally {
+
+          if (gssContext != null) {
+              logger.debug("Disposing context");
+              gssContext.dispose();
+          }
+      }
   }
 
   private static class CredentialGenerator implements PrivilegedExceptionAction {

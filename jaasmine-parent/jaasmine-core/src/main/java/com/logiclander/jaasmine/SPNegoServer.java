@@ -18,6 +18,8 @@ package com.logiclander.jaasmine;
 import static com.logiclander.jaasmine.JAASMineContants.*;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -39,22 +41,31 @@ public class SPNegoServer {
   private final boolean isValidToken;
   private final boolean canDelegateToken;
   private final GSSCredential gssDelegateCred;
+    private final Log logger = LogFactory.getLog(SPNegoServer.class);
 
   public SPNegoServer(String spnegoToken)
           throws GSSException {
-    gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
-    final GSSContext gssContext;
-    gssContext = gssManager.createContext(gssServerCred);
+    GSSContext gssContext = null;
     byte[] requestToken = Base64.decodeBase64(spnegoToken);
-    responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
-    isValidToken = gssContext.isEstablished();
-    canDelegateToken = gssContext.getCredDelegState();
-    if (canDelegateToken) {
-      gssDelegateCred = gssContext.getDelegCred();
-    } else {
-      gssDelegateCred = null;
+
+    try {
+        gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
+        gssContext = gssManager.createContext(gssServerCred);
+        responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
+        isValidToken = gssContext.isEstablished();
+        canDelegateToken = gssContext.getCredDelegState();
+        if (canDelegateToken) {
+          gssDelegateCred = gssContext.getDelegCred();
+        } else {
+          gssDelegateCred = null;
+        }
+    } finally {
+
+        if (gssContext != null) {
+          logger.debug("Disposing context");
+          gssContext.dispose();
+        }
     }
-    gssContext.dispose();
   }
 
   public boolean isValidToken() {

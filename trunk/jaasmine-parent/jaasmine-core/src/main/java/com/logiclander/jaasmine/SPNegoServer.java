@@ -32,24 +32,21 @@ public class SPNegoServer {
   private final GSSContext gssContext;
   private byte[] delegateToken = null;
 
-  public SPNegoServer()
+  public SPNegoServer(String authenticationHeader)
          throws GSSException {
     final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
     final GSSManager gssManager = GSSManager.getInstance();
 
     final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
     gssContext = gssManager.createContext(gssServerCred);
-  }
 
-  private void generateDelegateToken(String authenticationHeader)
-          throws GSSException {
     byte[] token = Base64.decode(authenticationHeader);
     delegateToken = gssContext.acceptSecContext(token, 0, token.length);
+
   }
 
-  public boolean validateToken(String authenticationHeader)
+  public boolean isValid()
           throws GSSException {
-    generateDelegateToken(authenticationHeader);
     if(gssContext.isEstablished()) {
       return true;
     } else {

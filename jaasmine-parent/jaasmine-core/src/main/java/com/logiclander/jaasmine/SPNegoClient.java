@@ -47,6 +47,12 @@ public class SPNegoClient {
     gssClientCred = (GSSCredential) Subject.doAs(subject, new CredentialGenerator(gssManager, type.getOidValue()));
   }
 
+  public SPNegoClient(GSSCredential credential)
+          throws GSSException, PrivilegedActionException {
+    // use existing (perhaps delegated) credential
+    gssClientCred = credential;
+  }
+
   public boolean getCredentialDelegationState() {
     return credentialDelegationState;
   }

@@ -48,7 +48,7 @@ public class SPNegoClient {
   }
 
   public SPNegoClient(GSSCredential credential)
-          throws GSSException, PrivilegedActionException {
+          throws GSSException {
     // use existing (perhaps delegated) credential
     gssClientCred = credential;
   }

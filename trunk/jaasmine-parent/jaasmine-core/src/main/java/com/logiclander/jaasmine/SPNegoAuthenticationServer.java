@@ -122,6 +122,7 @@ public class SPNegoAuthenticationServer {
         } finally {
 
             if (context != null) {
+                logger.debug("Disposing context");
                 context.dispose();
             }
         }
@@ -194,6 +195,7 @@ public class SPNegoAuthenticationServer {
         } finally {
 
             if (delegateContext != null) {
+                logger.debug("Disposing delegate context");
                 delegateContext.dispose();
             }
 

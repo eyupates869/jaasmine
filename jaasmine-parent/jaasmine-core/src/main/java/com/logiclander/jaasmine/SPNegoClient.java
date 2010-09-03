@@ -35,55 +35,29 @@ import org.ietf.jgss.Oid;
  */
 public class SPNegoClient {
 
-  private final GSSContext gssContext;
+  private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
+  private final GSSManager gssManager = GSSManager.getInstance();
+  private final GSSCredential gssClientCred;
+  private boolean credentialDelegationState = true;
+  private boolean mutualAuthenticationState = true;
 
-  public SPNegoClient(Subject subject, String spn, AuthenticationType type)
+  public SPNegoClient(Subject subject, AuthenticationType type)
           throws GSSException, PrivilegedActionException {
     // create a GSS Credential from a Subject that has Kerberos ticket(s)
-    final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
-    final GSSManager gssManager = GSSManager.getInstance();
-    final GSSCredential gssClientCred = (GSSCredential) Subject.doAs(subject, new CredentialGenerator(gssManager, type.getOidValue()));
-    // use the GSS Credential to create a SPNego Token and insert it into the HTTP header
+    gssClientCred = (GSSCredential) Subject.doAs(subject, new CredentialGenerator(gssManager, type.getOidValue()));
+  }
+
+  public String generateSPNegoToken(String spn) throws GSSException {
+    final GSSContext gssContext;
+    byte[] spnegoToken = new byte[0];
     // create target server Service Principal Name (SPN)
     GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
     //GSSName gssServerName = manager.createName(spn,GSSName.NT_HOSTBASED_SERVICE,spnegoMechOid);
+    // use the GSS Credential to create a SPNego Token for the target server
     gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssClientCred, GSSContext.DEFAULT_LIFETIME);
-    // enable GSS credential delegation by default
-    setCredentialDelegationState(true);
-    // enable mutual authentication with server by default (keytab required)
-    setMutualAuthenticationState(true);
-  }
-
-  public boolean getCredentialDelegationState() {
-    return gssContext.getCredDelegState();
-  }
-
-  // must be set prior to (initSecContext) generating first SPNegoToken
-  public void setCredentialDelegationState(boolean state) throws GSSException {
-    gssContext.requestCredDeleg(state);
-  }
-
-  public boolean getMutualAuthenticationState() {
-    return gssContext.getMutualAuthState();
-  }
-
-  // must be set prior to (initSecContext) generating first SPNegoToken
-  public void setMutualAuthenticationState(boolean state) throws GSSException {
-    gssContext.requestMutualAuth(state);
-  }
-
-  public void dispose() throws GSSException {
-    gssContext.dispose();
-  }
-
-  public boolean isNegotiated() {
-    return gssContext.isEstablished();
-  }
-
-  public String generateSPNegoToken() throws GSSException {
-    // create a SPNEGO token for the target server
-    byte[] spnegoToken = new byte[0];
     spnegoToken = gssContext.initSecContext(spnegoToken, 0, spnegoToken.length);
+    gssContext.dispose();
+    // return SPNegoToken to be inserted it into the HTTP header
     return new String(Base64.encodeBase64(spnegoToken));
   }
 

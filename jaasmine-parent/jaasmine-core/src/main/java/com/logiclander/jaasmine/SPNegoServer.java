@@ -51,10 +51,11 @@ public class SPNegoServer {
     isValidToken = gssContext.isEstablished();
     canDelegateToken = gssContext.getCredDelegState();
     if (canDelegateToken) {
-        gssDelegateCred = gssContext.getDelegCred();
+      gssDelegateCred = gssContext.getDelegCred();
     } else {
-        gssDelegateCred = null;
+      gssDelegateCred = null;
     }
+    gssContext.dispose();
   }
 
   public boolean isValidToken() {
@@ -66,23 +67,24 @@ public class SPNegoServer {
   }
 
   public GSSCredential getDelegatedCredential() {
-     return gssDelegateCred;
+    return gssDelegateCred;
   }
 
   public byte[] getResponseToken() {
-     return responseToken;
+    return responseToken;
   }
 
-  public byte[] generateDelegateToken(String spn)
-         throws GSSException {
-     if (gssDelegateCred == null) {
+  public byte[] generateDelegateSPNegoToken(String spn)
+          throws GSSException {
+    if (gssDelegateCred == null) {
       return EMPTY_BYTE_ARRAY;
     }
     GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
-    final GSSContext delegateContext;
-    delegateContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssDelegateCred, GSSContext.DEFAULT_LIFETIME);
-    byte[] delegateToken = new byte[0];
-    delegateToken = delegateContext.initSecContext(delegateToken, 0, delegateToken.length);
-    return delegateToken;
+    final GSSContext gssContext;
+    gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssDelegateCred, GSSContext.DEFAULT_LIFETIME);
+    byte[] delegateSPNegoToken = new byte[0];
+    delegateSPNegoToken = gssContext.initSecContext(delegateSPNegoToken, 0, delegateSPNegoToken.length);
+    gssContext.dispose();
+    return delegateSPNegoToken;
   }
 }

@@ -31,38 +31,39 @@ import org.ietf.jgss.Oid;
  */
 public class SPNegoServer {
 
+  /** An empty byte array to return (avoids null pointer exceptions).*/
+  private transient static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
   private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
-  private final GSSContext gssContext;
+  private final GSSManager gssManager = GSSManager.getInstance();
+  private final GSSCredential gssServerCred;
+  private final byte[] responseToken;
+  private final boolean isValidToken;
+  private final boolean canDelegateToken;
 
   public SPNegoServer(String spnegoToken)
           throws GSSException {
-    final GSSManager gssManager = GSSManager.getInstance();
-
-    final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
+    gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
+    final GSSContext gssContext;
     gssContext = gssManager.createContext(gssServerCred);
 
     byte[] requestToken = Base64.decodeBase64(spnegoToken);
-    byte[] responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
+    responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
+    isValidToken = gssContext.isEstablished();
+    canDelegateToken = gssContext.getCredDelegState();
   }
 
-  public boolean isValidToken()
-          throws GSSException {
-    if (gssContext.isEstablished()) {
-      return true;
-    } else {
-      return false;
-    }
+  public boolean isValidToken() {
+    return isValidToken;
   }
 
-  public boolean isDelegateToken()
-          throws GSSException {
-    return gssContext.getCredDelegState();
+  public boolean canDelegateToken() {
+    return canDelegateToken;
   }
 
   public byte[] generateDelegateToken(String endpointSPN, boolean allowFurtherDelegation)
          throws GSSException {
-    if(!isDelegateToken()) {
-      return null;
+    if(!canDelegateToken()) {
+      return EMPTY_BYTE_ARRAY;
     }
 
     GSSCredential delegateCred = gssContext.getDelegCred();

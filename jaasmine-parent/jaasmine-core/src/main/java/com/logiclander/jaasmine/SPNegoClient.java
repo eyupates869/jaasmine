@@ -43,8 +43,18 @@ public class SPNegoClient {
 
   public SPNegoClient(Subject subject, AuthenticationType type)
           throws GSSException, PrivilegedActionException {
-    // create a GSS Credential from a Subject that has Kerberos ticket(s)
+    // create a GSS Credential using a JAAS Subject that has Kerberos ticket(s)
     gssClientCred = (GSSCredential) Subject.doAs(subject, new CredentialGenerator(gssManager, type.getOidValue()));
+  }
+
+  public SPNegoClient(String spnegoToken)
+          throws GSSException {
+    // create a GSS Credential using a SPNegoToken from an authentication header
+    final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
+    GSSContext gssContext = gssManager.createContext(gssServerCred);
+
+    byte[] token = Base64.decodeBase64(spnegoToken);
+    String requestToken = gssContext.acceptSecContext(token, 0, token.length);
   }
 
   public boolean getCredentialDelegationState() {

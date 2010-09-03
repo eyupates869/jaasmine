@@ -72,6 +72,9 @@ public class SPNegoClient {
   }
 
   public String generateSPNegoToken(String spn) throws GSSException {
+    if (gssClientCred == null) {
+      return "";
+    }
     final GSSContext gssContext;
     byte[] spnegoToken = new byte[0];
     // create target server Service Principal Name (SPN)

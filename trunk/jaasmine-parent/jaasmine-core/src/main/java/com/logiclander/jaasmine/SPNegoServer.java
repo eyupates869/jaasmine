@@ -22,7 +22,6 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
@@ -80,17 +79,4 @@ public class SPNegoServer {
     return client.generateSPNegoToken(spn);
   }
 
-//  public byte[] generateDelegateSPNegoToken(String spn)
-//          throws GSSException {
-//    if (gssDelegateCred == null) {
-//      return EMPTY_BYTE_ARRAY;
-//    }
-//    GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
-//    final GSSContext gssContext;
-//    gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssDelegateCred, GSSContext.DEFAULT_LIFETIME);
-//    byte[] delegateSPNegoToken = new byte[0];
-//    delegateSPNegoToken = gssContext.initSecContext(delegateSPNegoToken, 0, delegateSPNegoToken.length);
-//    gssContext.dispose();
-//    return delegateSPNegoToken;
-//  }
 }

@@ -53,8 +53,8 @@ public class SPNegoClient {
     final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
     GSSContext gssContext = gssManager.createContext(gssServerCred);
 
-    byte[] token = Base64.decodeBase64(spnegoToken);
-    String requestToken = gssContext.acceptSecContext(token, 0, token.length);
+    byte[] requestToken = Base64.decodeBase64(spnegoToken);
+    byte[] responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
   }
 
   public boolean getCredentialDelegationState() {

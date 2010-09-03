@@ -33,17 +33,16 @@ public class SPNegoServer {
 
   private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
   private final GSSContext gssContext;
-  private byte[] requestToken = null;
 
-  public SPNegoServer(String authenticationHeader)
+  public SPNegoServer(String spnegoToken)
           throws GSSException {
     final GSSManager gssManager = GSSManager.getInstance();
 
     final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
     gssContext = gssManager.createContext(gssServerCred);
 
-    byte[] token = Base64.decodeBase64(authenticationHeader);
-    requestToken = gssContext.acceptSecContext(token, 0, token.length);
+    byte[] requestToken = Base64.decodeBase64(spnegoToken);
+    byte[] responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
   }
 
   public boolean isValidToken()

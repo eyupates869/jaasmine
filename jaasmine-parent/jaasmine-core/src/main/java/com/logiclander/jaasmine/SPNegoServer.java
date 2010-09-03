@@ -78,10 +78,9 @@ public class SPNegoServer {
      if (gssDelegateCred == null) {
       return EMPTY_BYTE_ARRAY;
     }
-    final GSSManager delegateManager = GSSManager.getInstance();
-    GSSName gssServerName = delegateManager.createName(spn, GSSName.NT_USER_NAME);
+    GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
     final GSSContext delegateContext;
-    delegateContext = delegateManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssDelegateCred, GSSContext.DEFAULT_LIFETIME);
+    delegateContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssDelegateCred, GSSContext.DEFAULT_LIFETIME);
     byte[] delegateToken = new byte[0];
     delegateToken = delegateContext.initSecContext(delegateToken, 0, delegateToken.length);
     return delegateToken;

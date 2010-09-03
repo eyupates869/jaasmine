@@ -22,6 +22,7 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
@@ -29,32 +30,54 @@ import org.ietf.jgss.Oid;
  * @author tcarroll
  */
 public class SPNegoServer {
+
+  private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
   private final GSSContext gssContext;
-  private byte[] delegateToken = null;
+  private byte[] requestToken = null;
 
   public SPNegoServer(String authenticationHeader)
-         throws GSSException {
-    final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
+          throws GSSException {
     final GSSManager gssManager = GSSManager.getInstance();
 
     final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
     gssContext = gssManager.createContext(gssServerCred);
 
     byte[] token = Base64.decode(authenticationHeader);
-    delegateToken = gssContext.acceptSecContext(token, 0, token.length);
-
+    requestToken = gssContext.acceptSecContext(token, 0, token.length);
   }
 
-  public boolean isValid()
+  public boolean isValidToken()
           throws GSSException {
-    if(gssContext.isEstablished()) {
+    if (gssContext.isEstablished()) {
       return true;
     } else {
       return false;
     }
   }
 
-  public byte[] getDelegateToken() {
+  public boolean isDelegateToken()
+          throws GSSException {
+    return gssContext.getCredDelegState();
+  }
+
+  public byte[] generateDelegateToken(String endpointSPN, boolean allowFurtherDelegation)
+         throws GSSException {
+    if(!isDelegateToken()) {
+      return null;
+    }
+
+    GSSCredential delegateCred = gssContext.getDelegCred();
+
+    endpointSPN = "HTTP/spnegotestserver.domain.com@REALM.COM";
+
+    final GSSManager delegateManager = GSSManager.getInstance();
+    GSSName gssServerName = delegateManager.createName(endpointSPN, GSSName.NT_USER_NAME);
+
+    final GSSContext delegateContext;
+    delegateContext = delegateManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, delegateCred, GSSContext.DEFAULT_LIFETIME);
+    delegateContext.requestCredDeleg(allowFurtherDelegation);
+    byte[] delegateToken = new byte[0];
+    delegateToken = delegateContext.initSecContext(delegateToken, 0, delegateToken.length);
     return delegateToken;
   }
 }

@@ -42,7 +42,7 @@ public class SPNegoServer {
     final GSSCredential gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
     gssContext = gssManager.createContext(gssServerCred);
 
-    byte[] token = Base64.decode(authenticationHeader);
+    byte[] token = Base64.decodeBase64(authenticationHeader);
     requestToken = gssContext.acceptSecContext(token, 0, token.length);
   }
 

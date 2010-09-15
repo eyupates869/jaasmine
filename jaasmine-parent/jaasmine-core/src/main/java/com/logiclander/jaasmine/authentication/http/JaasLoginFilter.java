@@ -129,7 +129,9 @@ public class JaasLoginFilter implements Filter {
      * configured in the {@code web.xml} for the web application with the
      * servlet-name {@code JaasLoginServlet}.</LI>
      * </OL>
-     *
+     * When the login is successful, the ServletRequest is wrapped in a
+     * {@link JaasmineHttpServletRequest}.
+     * 
      * @param request the ServletRequest
      * @param response the ServletResponse
      * @param chain the FilterChain
@@ -162,7 +164,10 @@ public class JaasLoginFilter implements Filter {
 
                 if (canExecute) {
 
-                    chain.doFilter(httpReq, httpResp);
+                    String username = request.getParameter("username");
+                    JaasmineHttpServletRequest wrapped =
+                            new JaasmineHttpServletRequest(httpReq, username);
+                    chain.doFilter(wrapped, httpResp);
 
                 } else {
 

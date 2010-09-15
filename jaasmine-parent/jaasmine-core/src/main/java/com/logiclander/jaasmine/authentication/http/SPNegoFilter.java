@@ -16,6 +16,7 @@
 
 package com.logiclander.jaasmine.authentication.http;
 
+import com.logiclander.jaasmine.SPNegoServer;
 import com.logiclander.jaasmine.authentication.AuthenticationService;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ietf.jgss.GSSException;
 
 /**
  * Checks incoming ServletRequests and ServletResponses for authentication.
@@ -122,18 +124,39 @@ public class SPNegoFilter implements Filter {
             HttpServletRequest hreq = (HttpServletRequest) request;
             HttpServletResponse hresp = (HttpServletResponse) response;
 
-            boolean canExecute = hasValidSPNegoToken(hreq);
+            String sPNegoToken = getSPNegoToken(hreq);
+            boolean canExecute = false;
+            SPNegoServer server = null;
+            
+            try {
+
+                server = new SPNegoServer(sPNegoToken);
+                canExecute = server.isValidToken();
+
+            } catch (GSSException ex) {
+
+                if (logger.isDebugEnabled()) {
+
+                    logger.debug("Problem with SPNego token", ex);
+
+                } else {
+
+                    logger.info(String.format("Problem with SPNego token: %s",
+                         ex.getMessage()));
+
+                }
+                canExecute = false;
+            }
 
             if (canExecute) {
 
-                // Wrap hreq and hresp so LoginFilter won't bother with it?
-                //
+                // TODO: create Subject?
                 chain.doFilter(hreq, hresp);
 
             } else {
 
                 if (!hresp.isCommitted()) {
-                    hresp.addHeader("WWW-Authenticate", "Negotiate");
+                    hresp.setHeader("WWW-Authenticate", "Negotiate");
                     hresp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
@@ -162,18 +185,23 @@ public class SPNegoFilter implements Filter {
      */
     @Override
     public String toString() {
-        return String.format("%s for %s", this.getClass().getSimpleName(),
-                appName);
+        return String.format("%s for %s",
+                this.getClass().getSimpleName(), appName);
     }
 
 
-    /**
-     * @param req the HttpServletRequest
-     * @return true if a valid SPNego token is on the request.
-     */
-    private boolean hasValidSPNegoToken(HttpServletRequest req) {
+    private String getSPNegoToken(HttpServletRequest req) {
 
-        // TODO: implement
-        return false;
+        String headerValue = req.getHeader("Authorization");
+        if (headerValue == null || headerValue.isEmpty()) {
+            return "";
+        }
+
+        // Split "Negotiate [SPNego_TOKEN]" by the space and return the token.
+        String token = headerValue.split(" ", 2)[1];
+
+        logger.debug(String.format("%nSPNego token%n%s%n", token));
+
+        return token;
     }
 }

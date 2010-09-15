@@ -16,11 +16,10 @@
  limitations under the License.
 
 -->
-
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-    <display-name>jaasmine-test</display-name>
-    
-    <!-- 
+    <display-name>jaasmine-example-webapp</display-name>
+   
+    <!--
      JaasLoginFilter: filters incoming requests for a 
      javax.security.auth.Subject set on the HttpSession.  If found, access to 
      the resource is granted.  Otherwise, access is denied and the request is
@@ -41,13 +40,38 @@
         <filter-name>JaasLoginFilter</filter-name>
         <filter-class>com.logiclander.jaasmine.authentication.http.JaasLoginFilter</filter-class>
     </filter>
+
+    <!--
+     SPNegoFilter: filters incoming requests for a SPNego token set as an
+     HTTP header (Authorization).  If found, and if valid, access to the
+     resource is granted.  This filter should be used on web services (i.e.
+     REST or SOAP based services).
+    -->
+    <filter>
+        <filter-name>SPNegoFilter</filter-name>
+        <filter-class>com.logiclander.jaasmine.authentication.http.SPNegoFilter</filter-class>
+        <init-param>
+            <description>The server principal name.  This must be set or a ServletException will be thrown during the init method.</description>
+            <param-name>serverPrincipalName</param-name>
+            <param-value>HTTP/panache.ci.uiuc.edu</param-value>
+        </init-param>
+    </filter>
     
     <!-- Send all requests through JaasLoginFilter -->
     <filter-mapping>
         <filter-name>JaasLoginFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/Login</url-pattern>
+        <url-pattern>/Logout</url-pattern>
+        <url-pattern>/AboutYou</url-pattern>
+        <url-pattern>/index.jsp</url-pattern>
+        <url-pattern>/index.html</url-pattern>
+        <url-pattern>/Home</url-pattern>
     </filter-mapping>
-    
+
+    <filter-mapping>
+        <filter-name>SPNegoFilter</filter-name>
+        <url-pattern>/wsdemo/*</url-pattern>
+    </filter-mapping>
     <!-- 
       Configured as the default servlet to use for Login.  See the source code
       of com.logiclander.jaasmine.authentication.http.JaasLoginFilter for more
@@ -67,7 +91,7 @@
      library.
     -->
     <servlet>
-        <servlet-name>Logout</servlet-name>
+        <servlet-name>JaasLogoutServlet</servlet-name>
         <servlet-class>com.logiclander.jaasmine.authentication.http.SimpleLogoutServlet</servlet-class>
     </servlet>
 
@@ -93,6 +117,19 @@
     </servlet>
 
     <!--
+     The DemoWSServlet servlet is a demonstration of SPNego token
+     authentication for an HTTP web service.
+    -->
+    <servlet>
+        <servlet-name>DemoWSServlet</servlet-name>
+        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.logiclander.jaasminetest.ws.DemoWSJaxRsApplication</param-value>
+        </init-param>
+    </servlet>
+
+    <!--
      Servlet mappings should not be changed in this web application because
      the paths are hard-coded into the JSPs.
     -->
@@ -102,7 +139,7 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>Logout</servlet-name>
+        <servlet-name>JaasLogoutServlet</servlet-name>
         <url-pattern>/Logout</url-pattern>
     </servlet-mapping>
 
@@ -112,15 +149,15 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>JaasLoginServlet</servlet-name>
-        <url-pattern>/Login</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>Home</servlet-name>
         <url-pattern>/index.html</url-pattern>
         <url-pattern>/index.jsp</url-pattern>
         <url-pattern>/Home</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DemoWSServlet</servlet-name>
+        <url-pattern>/wsdemo/*</url-pattern>
     </servlet-mapping>
 
     <session-config>
@@ -130,4 +167,4 @@
     <welcome-file-list>
         <welcome-file>/WEB-INF/jsp/index.jsp</welcome-file>
     </welcome-file-list>
-</web-app>
+ </web-app>

@@ -44,6 +44,10 @@ import org.apache.commons.logging.LogFactory;
  *  <LI>loginServletName - the name of the Servlet that will be used to
  * collect user credentials.  This parameter is optional.  The default value is
  * {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}</LI>
+ *  <LI>setRemoteUserOnLogin - when "true", calls to
+ * {@link javax.servlet.http.HttpServletRequest#getRemoteUser() getRemoteUser}
+ * will return the user name that was used by the user to log in.  The default
+ * value is {@value #DEFAULT_SET_REMOTE_USER_ON_LOGIN}</LI>
  * </UL>
  *
  * Requests that invoke this Filter must have parameters named {@code username}
@@ -67,6 +71,10 @@ public class JaasLoginFilter implements Filter {
             "JaasLoginServlet";
 
 
+    /** The default value for setRemoteUserOnLogin, which is {@value}.*/
+    private static final String DEFAULT_SET_REMOTE_USER_ON_LOGIN = "false";
+
+
     /**
      * The application name for the configuration to use in the JAAS file.  The
      * default value is
@@ -81,6 +89,12 @@ public class JaasLoginFilter implements Filter {
      */
     private String loginServletName;
 
+
+    /**
+     * Flag indicating whether or not to set the REMOTE_USER on a successful
+     * login.  The default value is {@value #DEFAULT_SET_REMOTE_UESR_ON_LOGIN}.
+     */
+    private boolean setRemoteUserOnLogin;
 
     /**
      * {@inheritDoc}
@@ -106,6 +120,14 @@ public class JaasLoginFilter implements Filter {
             logger.debug(String.format("%s initialized", toString()));
         }
 
+        String setRemoteUserOnLoginParam =
+                filterConfig.getInitParameter("setRemoteUserOnLogin");
+        if (setRemoteUserOnLoginParam != null ||
+                setRemoteUserOnLoginParam.isEmpty()) {
+            setRemoteUserOnLoginParam = DEFAULT_SET_REMOTE_USER_ON_LOGIN;
+        }
+
+        setRemoteUserOnLogin = Boolean.parseBoolean(setRemoteUserOnLoginParam);
     }
 
 
@@ -164,10 +186,16 @@ public class JaasLoginFilter implements Filter {
 
                 if (canExecute) {
 
-                    String username = request.getParameter("username");
-                    JaasmineHttpServletRequest wrapped =
+                    HttpServletRequest sendOn = null;
+
+                    if (setRemoteUserOnLogin) {
+                        String username = request.getParameter("username");
+                        sendOn =
                             new JaasmineHttpServletRequest(httpReq, username);
-                    chain.doFilter(wrapped, httpResp);
+                    } else {
+                        sendOn = httpReq;
+                    }
+                    chain.doFilter(sendOn, httpResp);
 
                 } else {
 

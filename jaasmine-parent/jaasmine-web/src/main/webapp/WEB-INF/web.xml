@@ -25,7 +25,7 @@
      the resource is granted.  Otherwise, access is denied and the request is
      sent to JaasLoginServlet.
 
-     Note: this Filter can take 2 init-params:
+     Note: this Filter can take 3 init-params:
      * appName: 
          the name of an application in the JAAS configuration file.  The JAAS
          configuration file name is set by the java.security.auth.login.config
@@ -34,7 +34,12 @@
 
      * loginServletName: 
          The value of a servlet-name in this web.xml file that will process the 
-                         login.  The default is JaasLoginServlet.
+         login.  The default is JaasLoginServlet.
+
+     * setRemoteUserOnLogin:
+         When set to true, wrap HttpServletRequests so that calls to
+         getRemoteUser and getUserPrincipal return the user ids associtated with
+         the Subject obtained from a successful login.  The default is false.
     -->
     <filter>
         <filter-name>JaasLoginFilter</filter-name>

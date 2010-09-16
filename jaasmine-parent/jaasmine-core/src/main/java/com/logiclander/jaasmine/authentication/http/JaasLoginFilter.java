@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  * <UL>
  *  <LI>appName - the name of the application in the JAAS configuration.  This
  * parameter is optional.  The default value is
- * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}</LI>
+ * {@value AuthenticationService#DEFAULT_JAASMINE_LOGIN_CONFIG}</LI>
  *  <LI>loginServletName - the name of the Servlet that will be used to
  * collect user credentials.  This parameter is optional.  The default value is
  * {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}</LI>
@@ -78,7 +78,7 @@ public class JaasLoginFilter implements Filter {
     /**
      * The application name for the configuration to use in the JAAS file.  The
      * default value is
-     * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}.
+     * {@value AuthenticationService#DEFAULT_JAASMINE_LOGIN_CONFIG}.
      */
     private String appName;
 
@@ -108,7 +108,7 @@ public class JaasLoginFilter implements Filter {
 
         appName = filterConfig.getInitParameter("appName");
         if (appName == null || appName.isEmpty()) {
-            appName = AuthenticationService.DEFAULT_JAAS_SPNEGO_CONFIG;
+            appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
         }
 
         loginServletName = filterConfig.getInitParameter("loginServletName");
@@ -122,7 +122,7 @@ public class JaasLoginFilter implements Filter {
 
         String setRemoteUserOnLoginParam =
                 filterConfig.getInitParameter("setRemoteUserOnLogin");
-        if (setRemoteUserOnLoginParam != null ||
+        if (setRemoteUserOnLoginParam == null ||
                 setRemoteUserOnLoginParam.isEmpty()) {
             setRemoteUserOnLoginParam = DEFAULT_SET_REMOTE_USER_ON_LOGIN;
         }
@@ -139,7 +139,8 @@ public class JaasLoginFilter implements Filter {
      * an HttpServletResponse, continue processing the filter chain (this almost
      * never happens)</LI>
      *  <LI>The HttpSession is checked for an attribute named
-     * {@link AuthenticationService#SUBJECT_KEY AuthenticationService.SUBJECT_KEY}</LI>
+     * {@link AuthenticationService#SUBJECT_KEY
+     * AuthenticationService.SUBJECT_KEY}</LI>
      *  <LI>If found, then processing the filter chain continues.</LI>
      *  <LI>If not found, then the request is checked for the {@code username}
      * and {@code password} parameters.  If these parameters are present, then
@@ -186,15 +187,14 @@ public class JaasLoginFilter implements Filter {
 
                 if (canExecute) {
 
-                    HttpServletRequest sendOn = null;
+                    HttpServletRequest sendOn = httpReq;
 
                     if (setRemoteUserOnLogin) {
-                        String username = request.getParameter("username");
-                        sendOn =
-                            new JaasmineHttpServletRequest(httpReq, username);
-                    } else {
-                        sendOn = httpReq;
+                        logger.debug("Wrapping request with logged in Subject");
+                        sendOn = new JaasmineHttpServletRequest(httpReq, 
+                                    getSubject(httpReq));
                     }
+
                     chain.doFilter(sendOn, httpResp);
 
                 } else {
@@ -312,18 +312,14 @@ public class JaasLoginFilter implements Filter {
 
         if (username == null || username.isEmpty()) {
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("username is missing");
-            }
+            logger.debug("username is missing");
             return subjectObtained;
 
         }
 
         if (password == null || password.isEmpty()) {
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("password is missing");
-            }
+            logger.debug("password is missing");
             return subjectObtained;
         }
 
@@ -339,5 +335,16 @@ public class JaasLoginFilter implements Filter {
         }
         
         return subjectObtained;
+    }
+
+
+    /**
+     * @param request the HttpServletRequest
+     * @return the Subject obtained from a successful login.
+     */
+    private Subject getSubject(HttpServletRequest request) {
+
+        HttpSession s = request.getSession();
+        return (Subject) s.getAttribute(AuthenticationService.SUBJECT_KEY);
     }
 }

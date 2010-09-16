@@ -77,7 +77,7 @@ public class SPNegoFilter implements Filter {
 
         appName = filterConfig.getInitParameter("appName");
         if (appName == null || appName.isEmpty()) {
-            appName = AuthenticationService.DEFAULT_JAAS_SPNEGO_CONFIG;
+            appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
         }
 
         if (logger.isDebugEnabled()) {

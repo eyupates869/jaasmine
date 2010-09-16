@@ -36,8 +36,8 @@ public interface AuthenticationService {
      * The default application name for a configuration used by JAAS during the
      * authentication process.
      */
-    public static final String DEFAULT_JAAS_SPNEGO_CONFIG =
-            "jaasmine.spnego.login";
+    public static final String DEFAULT_JAASMINE_LOGIN_CONFIG =
+            "jaasmine.login";
 
     
     /**

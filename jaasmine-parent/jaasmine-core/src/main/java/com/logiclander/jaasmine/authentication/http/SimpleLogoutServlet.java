@@ -84,7 +84,7 @@ public class SimpleLogoutServlet extends HttpServlet {
 
         appName = getInitParameter("appName");
         if (appName == null || appName.isEmpty()) {
-            appName = AuthenticationService.DEFAULT_JAAS_SPNEGO_CONFIG;
+            appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
         }
 
         postLogoutProcessorName = getInitParameter("postLogoutProcessorName");

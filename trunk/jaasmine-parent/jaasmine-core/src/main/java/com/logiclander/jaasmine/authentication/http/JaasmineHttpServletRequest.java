@@ -16,6 +16,9 @@
 
 package com.logiclander.jaasmine.authentication.http;
 
+import java.security.Principal;
+import java.util.Set;
+import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -28,28 +31,35 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
 
     private final HttpServletRequest wrapped;
 
-    private final String remoteUser;
-
+    private final Principal userPrincipal;
 
     /**
      * Constructs a new JaasmineHttpServletRequest
      * @param toWrap the HttpServletRequest to wrap
      * @param user the name of the user.
      */
-    JaasmineHttpServletRequest(HttpServletRequest toWrap, String user) {
+    JaasmineHttpServletRequest(HttpServletRequest toWrap, Subject subject) {
         super(toWrap);
-        this.remoteUser = user;
         this.wrapped = toWrap;
+
+        Set<Principal> principals = subject.getPrincipals();
+        userPrincipal = principals.iterator().next();
+
     }
 
 
     /**
      *
-     * @return the user name passed into the constructor.
      */
     @Override
     public String getRemoteUser() {
-        return remoteUser;
+        return userPrincipal.getName().split("@")[0];
+    }
+
+
+    @Override
+    public Principal getUserPrincipal() {
+        return userPrincipal;
     }
 
 }

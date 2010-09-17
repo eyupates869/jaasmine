@@ -68,8 +68,6 @@
         <url-pattern>/Login</url-pattern>
         <url-pattern>/Logout</url-pattern>
         <url-pattern>/AboutYou</url-pattern>
-        <url-pattern>/index.jsp</url-pattern>
-        <url-pattern>/index.html</url-pattern>
         <url-pattern>/Home</url-pattern>
     </filter-mapping>
 
@@ -94,10 +92,21 @@
     <!--
      Logs out the Subject.  This Servlet is included in the jaasmine-core
      library.
+
+     Note: this servlet can take 1 init-param:
+
+     * postLogoutProcessorName:
+         The servlet-name of a servlet in this file that will handle logout
+         post processing.  This post-processor could clean up additional
+         session information or display a custom logout page.
     -->
     <servlet>
         <servlet-name>JaasLogoutServlet</servlet-name>
         <servlet-class>com.logiclander.jaasmine.authentication.http.SimpleLogoutServlet</servlet-class>
+        <init-param>
+            <param-name>postLogoutProcessorName</param-name>
+            <param-value>PostLogoutServlet</param-value>
+        </init-param>
     </servlet>
 
     <!-- Shows a page with the logged in Subject information printed. -->
@@ -118,9 +127,30 @@
     -->
     <servlet>
         <servlet-name>Home</servlet-name>
-        <jsp-file>/WEB-INF/jsp/index.jsp</jsp-file>
+        <jsp-file>/WEB-INF/jsp/protected.jsp</jsp-file>
     </servlet>
 
+    <!--
+     This is the welcome page for this web application.
+    -->
+    <servlet>
+        <servlet-name>Welcome</servlet-name>
+        <jsp-file>/WEB-INF/jsp/index.jsp</jsp-file>
+    </servlet>
+    
+    <!--
+     This is the post logout servlet for this web application.  It will be
+     displayed when the user logs out.  This servlet simply displays a custom
+     JSP rather than the default plain text logout message.
+
+     There is no servlet mapping for this servlet as it's called by the
+     JaasLogoutServlet via named dispatcher.
+    -->
+    <servlet>
+        <servlet-name>PostLogoutServlet</servlet-name>
+        <jsp-file>/WEB-INF/jsp/postLogout.jsp</jsp-file>
+    </servlet>
+    
     <!--
      The DemoWSServlet servlet is a demonstration of SPNego token
      authentication for an HTTP web service.
@@ -155,9 +185,14 @@
 
     <servlet-mapping>
         <servlet-name>Home</servlet-name>
+        <url-pattern>/Home</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Welcome</servlet-name>
+        <url-pattern>/Welcome</url-pattern>
         <url-pattern>/index.html</url-pattern>
         <url-pattern>/index.jsp</url-pattern>
-        <url-pattern>/Home</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

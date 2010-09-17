@@ -31,28 +31,24 @@ import javax.servlet.http.HttpServletResponse;
  * specific session information.
  * 
  * A GET to this servlet means that JaasLoginFilter did not find the user's 
- * Subject so the PATH_INFO (that is, the path in /context/path of the request
- *  URL) will be saved and forwarded to /WEB-INF/jsp/login.jsp as the parameter 
- * "redirect_after_login" in the form used to gather the user's login
- * credentials.
+ * Subject so the request will be forwarded to /WEB-INF/jsp/login.jsp to gather
+ * the user's login credentials.
  * 
  * A POST to this servlet means that JaasLoginFilter has accepted the login
  * credentials from the user and a Subject was obtained from the configured
- * store.  The form parameter "redirect_after_login" is taken from the
- * request and a redirect is sent to it.
+ * store.
  * 
  * @author <a href="mailto:andy@logiclander.com">Andy Gherna</a>
  */
 public class LoginCheckServlet extends HttpServlet {
 
 
-    private static final String DEFAULT_REDIRECT_AFTER_LOGIN = "/index.html";
+    private static final String DEFAULT_REDIRECT_AFTER_LOGIN = "/Home";
 
     private static final String LOGIN_JSP = "/WEB-INF/jsp/login.jsp";
 
     /**
-     * Handles HTTP POST.  This method will send a redirect to a resource inside
-     * this application specified by the "redirect_after_login" parameter.
+     * Handles HTTP POST.  
      *
      * @param request the HttpServletRequest
      * @param response the HttpServletResponse
@@ -63,23 +59,17 @@ public class LoginCheckServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request,
         HttpServletResponse response) throws ServletException, IOException {
 
-        String redirectAfterLogin =
-            request.getParameter("redirect_after_login");
-
-        if (redirectAfterLogin == null || redirectAfterLogin.isEmpty()) {
-            redirectAfterLogin = DEFAULT_REDIRECT_AFTER_LOGIN;
-        }
-
         StringBuilder sb =
                 new StringBuilder(getServletContext().getContextPath());
-        response.sendRedirect(sb.append(redirectAfterLogin).toString());
+        response.sendRedirect(
+            sb.append(DEFAULT_REDIRECT_AFTER_LOGIN).toString()
+        );
         return;
     }
 
 
     /**
-     * Handles HTTP GET.  This method will save the PATH_INFO from the request
-     * and pass it to /WEB-INF/jsp/login.jsp to be put into the login form.
+     * Handles HTTP GET.  
      *
      * @param request the HttpServletRequest
      * @param response the HttpServletResponse
@@ -90,13 +80,6 @@ public class LoginCheckServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
         HttpServletResponse response) throws ServletException, IOException {
 
-        String path = request.getPathInfo();
-        if (path == null || path.isEmpty()) {
-            path = "";
-        }
-
-        request.setAttribute("redirectAfterLogin", path);
-        
         RequestDispatcher rd =
             getServletContext().getRequestDispatcher(LOGIN_JSP);
 

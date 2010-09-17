@@ -13,9 +13,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 --%>
-
 <%--
- A JSP that is displayed after the user has logged in.
+ The Welcome page.  This is displayed when the web application is first brought
+ up.
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -24,11 +24,14 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Logged in - Home</title>
+        <title>Jaasmine Web</title>
+        <link rel="stylesheet" href="looks.css" type="text/css" media="screen"/>
     </head>
     <body>
-        <h1>You are logged in.</h1>
-
-        <p><a href="AboutYou">Learn about you</a> | <a href="Logout">Logout</a></p>
+        <h1>Welcome</h1>
+        <div id="centered">
+            <p>This is a simple application that demonstrates the web capabilities of jaasmine.</p>
+            <p><a href="Home">Log in</a></p>
+        </div>
     </body>
 </html>

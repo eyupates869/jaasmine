@@ -15,28 +15,23 @@
 --%>
 
 <%--
- JSP that AboutYouServlet dispatches to.  This will display the logged in
- Subject.
+ A JSP that is displayed after the user has logged in.
 --%>
-<%@page contentType="text/html" pageEncoding="MacRoman"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
+
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=MacRoman">
-        <title>All About You</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Logged in - Home</title>
         <link rel="stylesheet" href="looks.css" type="text/css" media="screen"/>
     </head>
     <body>
-        <h1>All About You</h1>
-        <p>
-        <pre>
-<c:out value="${subject}"/>
-        </pre>
-        </p>
+        <h1>You are logged in.</h1>
+
         <div id="centered">
-            <p><a href="Home">Home</a> | <a href="Logout">Logout</a></p>
+            <p><a href="AboutYou">Learn about you</a> | <a href="Logout">Logout</a></p>
         </div>
     </body>
 </html>

@@ -21,9 +21,6 @@
     The user's username (required by JaasLoginFilter).
  password:
     The user's password (required by JaasLoginFilter).
- redirect_after_login:
-    PATH_INFO (target) of a resource in this application to send the user to
-    after they are logged in (required by JaasLoginServlet).
 
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -35,18 +32,25 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=MacRoman">
         <title>Login</title>
+        <link rel="stylesheet" href="looks.css" type="text/css" media="screen"/>
     </head>
     <body>
         <h1>Log in to this application</h1>
+
         <form action="Login" method="POST">
-            <label for="username">UserName:</label>
-            <input type="text" name="username" id="username"/>
-            <br/>
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password"/>
-            <br/>
-            <input type="hidden" name="redirect_after_login" value="<c:out value="${redirectAfterLogin}"/>"/>
-            <input type="submit" value="Login"/>
+            <ol>
+                <li>
+                    <label for="username">UserName:</label>
+                    <input type="text" name="username" id="username"/>
+                </li>
+                <li>
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" id="password"/>
+                </li>
+                <li>
+                    <input type="submit" value="Login"/>
+                </li>
+            </ol>
         </form>
     </body>
 </html>

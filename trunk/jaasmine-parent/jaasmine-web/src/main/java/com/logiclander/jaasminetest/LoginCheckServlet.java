@@ -60,7 +60,7 @@ public class LoginCheckServlet extends HttpServlet {
         HttpServletResponse response) throws ServletException, IOException {
 
         StringBuilder sb =
-                new StringBuilder(getServletContext().getContextPath());
+                new StringBuilder(request.getContextPath());
         response.sendRedirect(
             sb.append(DEFAULT_REDIRECT_AFTER_LOGIN).toString()
         );

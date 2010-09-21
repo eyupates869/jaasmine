@@ -93,6 +93,9 @@ public class JaasLoginFilter implements Filter {
     private String appName;
 
 
+    private String filterName;
+
+
     /**
      * Dispatch to this path in the web context if set.  If this is set, the
      * loginRedirect and loginServletName are ignored.
@@ -160,6 +163,8 @@ public class JaasLoginFilter implements Filter {
 
         setRemoteUserOnLogin = Boolean.parseBoolean(setRemoteUserOnLoginParam);
 
+        filterName = filterConfig.getFilterName();
+
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s initialized", toString()));
             logger.debug(String.format("loginPath = %s",
@@ -168,6 +173,8 @@ public class JaasLoginFilter implements Filter {
                     loginRedirect == EMPTY_STRING ? "Not set" : loginRedirect));
             logger.debug(String.format("loginServletName = %s",
                     loginServletName));
+            logger.debug(String.format("setRemoteUserOnLogin = %s",
+                    Boolean.toString(setRemoteUserOnLogin)));
         }
     }
 
@@ -212,6 +219,10 @@ public class JaasLoginFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, 
             FilterChain chain) throws IOException, ServletException {
 
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%s: entering doFilter", filterName));
+        }
+        
         if (!(request instanceof HttpServletRequest) &&
             !(response instanceof HttpServletResponse)) {
 
@@ -242,9 +253,11 @@ public class JaasLoginFilter implements Filter {
                     HttpServletRequest sendOn = httpReq;
 
                     if (setRemoteUserOnLogin) {
-                        logger.debug("Wrapping request with logged in Subject");
                         sendOn = new JaasmineHttpServletRequest(httpReq, 
                                     getSubject(httpReq));
+                        logger.debug(String.format("Wrapping in request: %s",
+                                sendOn.toString()));
+
                     }
 
                     chain.doFilter(sendOn, httpResp);
@@ -300,12 +313,14 @@ public class JaasLoginFilter implements Filter {
 
                         // Try to figure out what went wrong and send back
                         // a HELPFUL exception message.
+
                         String msg = "";
 
                         if (!loginPath.equals(EMPTY_STRING)) {
 
                             // First, is there a loginPath set, but nowhere to
                             // send it to?
+                            
                             msg =
                                 String.format("loginPath set to %s, but no "
                                     + "resource is available to dispatch to",
@@ -373,7 +388,7 @@ public class JaasLoginFilter implements Filter {
      */
     @Override
     public String toString() {
-        return String.format("%s for %s", this.getClass().getSimpleName(),
+        return String.format("%s for %s", filterName,
                 appName);
     }
 

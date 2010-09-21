@@ -66,6 +66,9 @@ public class SPNegoFilter implements Filter {
     private String appName;
 
 
+    public String filterName;
+
+
     /**
      * {@inheritDoc}
      *
@@ -79,6 +82,8 @@ public class SPNegoFilter implements Filter {
         if (appName == null || appName.isEmpty()) {
             appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
         }
+
+        filterName = filterConfig.getFilterName();
 
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s initialized", toString()));
@@ -114,6 +119,10 @@ public class SPNegoFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, 
             FilterChain chain) throws IOException, ServletException {
 
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%s: entering doFilter", filterName));
+        }
+        
         if (!(request instanceof HttpServletRequest) &&
                 !(response instanceof HttpServletResponse)) {
 
@@ -186,7 +195,7 @@ public class SPNegoFilter implements Filter {
     @Override
     public String toString() {
         return String.format("%s for %s",
-                this.getClass().getSimpleName(), appName);
+                filterName, appName);
     }
 
 

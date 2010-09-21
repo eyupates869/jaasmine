@@ -16,7 +16,10 @@
  limitations under the License.
 
 -->
-<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+             
     <display-name>jaasmine-web</display-name>
     <!--
      JaasLoginFilter: filters incoming requests for a
@@ -30,6 +33,14 @@
          configuration file name is set by the java.security.auth.login.config
          System property.  The default is value is jaasmine.spnego.login
 
+     * loginPath:
+         a path to a resource in the web application context that can be used
+         as a login processor.  This can be a path to a JSP, Servlet or HTML
+         page.  If this is set, loginRedirect and loginServletName are ignored.
+
+     * loginRedirect:
+         a relative or absolute URL to a login processor. If this is set,
+         loginServletName is ignored.
 
      * loginServletName:
          The value of a servlet-name in this web.xml file that will process the
@@ -54,11 +65,6 @@
     <filter>
         <filter-name>SPNegoFilter</filter-name>
         <filter-class>com.logiclander.jaasmine.authentication.http.SPNegoFilter</filter-class>
-        <init-param>
-            <description>The server principal name.  This must be set or a ServletException will be thrown during the init method.</description>
-            <param-name>serverPrincipalName</param-name>
-            <param-value>HTTP/panache.ci.uiuc.edu</param-value>
-        </init-param>
     </filter>
 
     <!-- Send all web application requests through JaasLoginFilter -->
@@ -106,6 +112,7 @@
         <servlet-name>JaasLoginServlet</servlet-name>
         <servlet-class>com.logiclander.jaasminetest.LoginCheckServlet</servlet-class>
     </servlet>
+    
     <!--
      Logs out the Subject.  This Servlet is included in the jaasmine-core
      library.
@@ -232,4 +239,5 @@
     <welcome-file-list>
         <welcome-file>/WEB-INF/jsp/index.jsp</welcome-file>
     </welcome-file-list>
+    
 </web-app>

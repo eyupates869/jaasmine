@@ -62,4 +62,11 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
         return userPrincipal;
     }
 
+    public String toString() {
+        return String.format("%s:%nuserPrincipal = %s%nREMOTE_USER = %s",
+                this.getClass().getSimpleName(),
+                userPrincipal.toString(),
+                this.getRemoteUser());
+    }
+
 }

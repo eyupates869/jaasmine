@@ -41,6 +41,12 @@ import org.apache.commons.logging.LogFactory;
  *  <LI>appName - the name of the application in the JAAS configuration.  This
  * parameter is optional.  The default value is
  * {@value AuthenticationService#DEFAULT_JAASMINE_LOGIN_CONFIG}</LI>
+ *  <LI>loginPath - if set, dispatch to this path in the web application.  This
+ * can be a JSP, Servlet or HTML page.</LI>
+ *  <LI>loginRedirect - if set, redirect to this URL for login processing and/or
+ * credential gathering.  The value can be a relative or absolute URL.  If the
+ * redirect is relative (that is, inside the web application), a servlet or
+ * JSP must be mapped to the URL listed here in the web.xml file.</LI>
  *  <LI>loginServletName - the name of the Servlet that will be used to
  * collect user credentials.  This parameter is optional.  The default value is
  * {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}</LI>
@@ -75,12 +81,30 @@ public class JaasLoginFilter implements Filter {
     private static final String DEFAULT_SET_REMOTE_USER_ON_LOGIN = "false";
 
 
+    /** Empty String flag used to stop some processing of login handling. */
+    private static final String EMPTY_STRING = "";
+
+
     /**
      * The application name for the configuration to use in the JAAS file.  The
      * default value is
      * {@value AuthenticationService#DEFAULT_JAASMINE_LOGIN_CONFIG}.
      */
     private String appName;
+
+
+    /**
+     * Dispatch to this path in the web context if set.  If this is set, the
+     * loginRedirect and loginServletName are ignored.
+     */
+    private String loginPath;
+
+
+    /**
+     * Redirect to this URL if set.  This could be in or out of the web
+     * application.  If this is set, the loginServletName is ignored.
+     */
+    private String loginRedirect;
 
 
     /**
@@ -96,6 +120,7 @@ public class JaasLoginFilter implements Filter {
      */
     private boolean setRemoteUserOnLogin;
 
+    
     /**
      * {@inheritDoc}
      *
@@ -111,13 +136,19 @@ public class JaasLoginFilter implements Filter {
             appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
         }
 
+        loginPath = filterConfig.getInitParameter("loginPath");
+        if (loginPath == null || loginPath.isEmpty()) {
+            loginPath = EMPTY_STRING;
+        }
+
+        loginRedirect = filterConfig.getInitParameter("loginRedirect");
+        if (loginRedirect == null || loginRedirect.isEmpty()) {
+            loginRedirect = EMPTY_STRING;
+        }
+
         loginServletName = filterConfig.getInitParameter("loginServletName");
         if (loginServletName == null || loginServletName.isEmpty()) {
             loginServletName = DEFAULT_NAMED_LOGIN_DISPATCHER;
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug(String.format("%s initialized", toString()));
         }
 
         String setRemoteUserOnLoginParam =
@@ -128,6 +159,16 @@ public class JaasLoginFilter implements Filter {
         }
 
         setRemoteUserOnLogin = Boolean.parseBoolean(setRemoteUserOnLoginParam);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%s initialized", toString()));
+            logger.debug(String.format("loginPath = %s",
+                    loginPath == EMPTY_STRING ? "Not set" : loginPath));
+            logger.debug(String.format("loginRedirect = %s",
+                    loginRedirect == EMPTY_STRING ? "Not set" : loginRedirect));
+            logger.debug(String.format("loginServletName = %s",
+                    loginServletName));
+        }
     }
 
 
@@ -148,12 +189,18 @@ public class JaasLoginFilter implements Filter {
      * credentials.</LI>
      *  <LI>If a Subject is returned, it is saved to the HttpSession with the
      * key from above.</LI>
-     *  <LI>If a Subject is not returned, the filter will dispatch to a Servlet
-     * configured in the {@code web.xml} for the web application with the
-     * servlet-name {@code JaasLoginServlet}.</LI>
      * </OL>
      * When the login is successful, the ServletRequest is wrapped in a
-     * {@link JaasmineHttpServletRequest}.
+     * {@link JaasmineHttpServletRequest}.  If it is unsuccessful, this filter
+     * will send the request to a login processor as follows:
+     * <OL>
+     *  <LI>If {@code loginPath} is set, dispatch the request to that resource.
+     * </LI>
+     *  <LI>If (@code loginRedirect} is set, redirect the request to that URL.
+     * </LI>
+     *  <LI>Dispatch to {@code loginServletName} if neither of the above are
+     * set./LI>
+     * </OL>
      * 
      * @param request the ServletRequest
      * @param response the ServletResponse
@@ -181,12 +228,17 @@ public class JaasLoginFilter implements Filter {
 
                 boolean canExecute = hasCredentials(httpReq);
 
+                // Attempt to login the user and obtain a Subject.
+                
                 if (!canExecute) {
                     canExecute = login(httpReq);
                 }
 
                 if (canExecute) {
 
+                    // The Subject was found which means the user has a valid
+                    // credential (Subject).  Processing can continue.
+                    
                     HttpServletRequest sendOn = httpReq;
 
                     if (setRemoteUserOnLogin) {
@@ -199,10 +251,45 @@ public class JaasLoginFilter implements Filter {
 
                 } else {
 
-                    RequestDispatcher loginDispatcher =
-                        httpReq.getSession()
-                            .getServletContext()
-                            .getNamedDispatcher(loginServletName);
+                    // No Subject found, need to dispatch to someplace to gather
+                    // the user's credentials and attempt a login on the
+                    // next request.
+                    
+                    RequestDispatcher loginDispatcher = null;
+                    if (!loginPath.equals(EMPTY_STRING)) {
+
+                        loginDispatcher =
+                            httpReq.getSession()
+                                .getServletContext()
+                                .getRequestDispatcher(loginPath);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(String.format("Dispatching login "
+                                    + "request to path %s", loginPath));
+                        }
+                        
+                    } else if (!loginRedirect.equals(EMPTY_STRING)) {
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(String.format("Redirectiong login "
+                                    + "request to %s", loginRedirect));
+                        }
+                        httpResp.sendRedirect(loginRedirect);
+                        return;
+
+                    } else {
+
+                        loginDispatcher =
+                            httpReq.getSession()
+                                .getServletContext()
+                                .getNamedDispatcher(loginServletName);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(String.format("Dispatching login "
+                                    + "request to named dispatcher %s",
+                                    loginServletName));
+                        }
+                    }
 
                     if (loginDispatcher != null) {
 
@@ -211,13 +298,33 @@ public class JaasLoginFilter implements Filter {
 
                     } else {
 
-                        String msg =
-                            String.format("Servlet %s is not configured",
-                                loginServletName);
+                        // Try to figure out what went wrong and send back
+                        // a HELPFUL exception message.
+                        String msg = "";
+
+                        if (!loginPath.equals(EMPTY_STRING)) {
+
+                            // First, is there a loginPath set, but nowhere to
+                            // send it to?
+                            msg =
+                                String.format("loginPath set to %s, but no "
+                                    + "resource is available to dispatch to",
+                                    loginPath);
+                        } else {
+
+                            // Is JaasLoginServlet (or the servlet-name
+                            // specified by loginServletName) not configured in
+                            // the web.xml?
+                        
+                            msg =
+                                String.format("Servlet named %s specified by "
+                                + "the loginServletName is not configured in "
+                                + "the web.xml", loginServletName);
+                        }
+
                         throw new ServletException(msg);
 
                     }
-                    
                 }
 
             } catch (IOException ex) {

@@ -226,6 +226,7 @@ public class JaasLoginFilter implements Filter {
         if (!(request instanceof HttpServletRequest) &&
             !(response instanceof HttpServletResponse)) {
 
+            logger.debug("This is not an HTTP request");
             chain.doFilter(request, response);
 
         } else {
@@ -234,6 +235,12 @@ public class JaasLoginFilter implements Filter {
             HttpServletResponse httpResp = (HttpServletResponse) response;
 
             Exception exception = null;
+
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                    String.format("Filtering request: %s%s",
+                        httpReq.getContextPath(), httpReq.getServletPath()));
+            }
 
             try {
 
@@ -255,7 +262,7 @@ public class JaasLoginFilter implements Filter {
                     if (setRemoteUserOnLogin) {
                         sendOn = new JaasmineHttpServletRequest(httpReq, 
                                     getSubject(httpReq));
-                        logger.debug(String.format("Wrapping in request: %s",
+                        logger.debug(String.format("Wrapping request in %s",
                                 sendOn.toString()));
 
                     }

@@ -34,7 +34,8 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
     private final Principal userPrincipal;
 
     /**
-     * Constructs a new JaasmineHttpServletRequest
+     * Constructs a new JaasmineHttpServletRequest.
+     * 
      * @param toWrap the HttpServletRequest to wrap
      * @param user the name of the user.
      */
@@ -49,21 +50,31 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
 
 
     /**
+     * {@inheritDoc }
      *
+     * The remote user is the user's Principal.  If it's a Kerberos principal,
+     * only the portion before the {@code @} symbol is returned.
      */
     @Override
     public String getRemoteUser() {
         return userPrincipal.getName().split("@")[0];
     }
 
-
+    /**
+     * @return the user's Principal.
+     */
     @Override
     public Principal getUserPrincipal() {
         return userPrincipal;
     }
 
+
+    /**
+     * @return a String representation of this JaasmineHttpServletRequest.
+     */
+    @Override
     public String toString() {
-        return String.format("%s:%nuserPrincipal = %s%nREMOTE_USER = %s",
+        return String.format("%s:userPrincipal = %s, REMOTE_USER = %s",
                 this.getClass().getSimpleName(),
                 userPrincipal.toString(),
                 this.getRemoteUser());

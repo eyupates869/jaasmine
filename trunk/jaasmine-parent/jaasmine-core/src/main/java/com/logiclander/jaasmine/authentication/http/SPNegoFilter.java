@@ -130,10 +130,16 @@ public class SPNegoFilter implements Filter {
 
         } else {
 
-            HttpServletRequest hreq = (HttpServletRequest) request;
-            HttpServletResponse hresp = (HttpServletResponse) response;
+            HttpServletRequest httpReq = (HttpServletRequest) request;
+            HttpServletResponse httpResp = (HttpServletResponse) response;
 
-            String sPNegoToken = getSPNegoToken(hreq);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                    String.format("Filtering request: %s%s",
+                        httpReq.getContextPath(), httpReq.getServletPath()));
+            }
+
+            String sPNegoToken = getSPNegoToken(httpReq);
             boolean canExecute = false;
             SPNegoServer server = null;
             
@@ -160,13 +166,13 @@ public class SPNegoFilter implements Filter {
             if (canExecute) {
 
                 // TODO: create Subject?
-                chain.doFilter(hreq, hresp);
+                chain.doFilter(httpReq, httpResp);
 
             } else {
 
-                if (!hresp.isCommitted()) {
-                    hresp.setHeader("WWW-Authenticate", "Negotiate");
-                    hresp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                if (!httpResp.isCommitted()) {
+                    httpResp.setHeader("WWW-Authenticate", "Negotiate");
+                    httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
 

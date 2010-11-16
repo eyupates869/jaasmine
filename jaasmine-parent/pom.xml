@@ -11,7 +11,7 @@
     of Java Authentication and Authorization Services (JAAS), and applies
     JAAS to common scenarios.
   </description>
-  <url>http://www.logiclander.com/products/jaasmine</url>
+  <url>http://www.logiclander.com/products#jaasmine</url>
   <licenses>
     <license>
       <name>Apache2</name>

@@ -8,10 +8,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.logiclander.jaasmine</groupId>
   <artifactId>jaasmine-core</artifactId>
-  <name>jaasmine-core</name>
   <version>1.0.0</version>
   <packaging>jar</packaging>
-  <url>http://maven.apache.org</url>
+  <name>jaasmine-core</name>
   <build>
     <plugins>
       <plugin>

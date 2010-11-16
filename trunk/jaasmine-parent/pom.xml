@@ -3,10 +3,35 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.logiclander.jaasmine</groupId>
   <artifactId>jaasmine-parent</artifactId>
-  <name>jaasmine-parent</name>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <url>http://maven.apache.org</url>
+  <name>jaasmine-parent</name>
+  <description>
+    The JAASmine library is based in Java and implements functionality
+    of Java Authentication and Authorization Services (JAAS), and applies
+    JAAS to common scenarios.
+  </description>
+  <url>http://www.logiclander.com/products/jaasmine</url>
+  <licenses>
+    <license>
+      <name>Apache2</name>
+      <distribution>repo</distribution>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <comments>a business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://jaasmine.googlecode.com/svn/trunk/</url>
+    <connection>scm:svn:https://jaasmine.googlecode.com/svn/trunk/</connection>
+  </scm>
+  <developers>
+    <developer>
+      <email>tim@logiclander.com</email>
+    </developer>
+    <developer>
+      <email>andy@logiclander.com</email>
+    </developer>
+  </developers>
   <modules>
     <module>jaasmine-core</module>
     <module>jaasmine-web</module>

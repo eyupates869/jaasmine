@@ -32,6 +32,7 @@ ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURRE
 
 {{{
 ...
+
 /*
  * This module is configured using the default name.  At a minimum, it uses the
  * com.sun.security.auth.module.Krb5LoginModule module class with the required
@@ -62,6 +63,7 @@ com.sun.security.jgss.krb5.accept {
 //    keyTab="${catalina.base}${/}conf${/}machine-name.keytab";
     keyTab="/path/to/file/service-username.keytab";
 };
+
 ...
 }}}
 
@@ -74,6 +76,8 @@ com.sun.security.jgss.krb5.accept {
  # copy {{{krb5.conf}}} to {{{$CATALINA_BASE/conf}}}
 
 {{{
+...
+
 [libdefaults]
 default_realm = AD.YOURDOMAIN.EDU
 forwardable = true
@@ -85,6 +89,8 @@ AD.YOURDOMAIN.EDU = {
  kdc = ad-dc-p2.ad.yourdomain.edu
  admin_server = ad-dc-p1.ad.yourdomain.edu
  }
+
+...
 }}}
 
 == create setenv.sh =
@@ -93,6 +99,7 @@ AD.YOURDOMAIN.EDU = {
 
 {{{
 ...
+
 # Enable JAAS/KRB5 authN/authZ
 CATALINA_OPTS="$CATALINA_OPTS -Djava.security.krb5.conf=/path/to/file/krb5.conf"
 CATALINA_OPTS="$CATALINA_OPTS -Djava.security.auth.login.config=/path/to/file/jaas.conf"
@@ -106,7 +113,7 @@ CATALINA_OPTS="$CATALINA_OPTS -Djavax.security.auth.useSubjectCredsOnly=false"
 
 export CATALINA_OPTS
 
-# CATALINA_PID  Path of the file which should contain the pid of catalina startup java process, when start is used
+# Path to file containing the process ID of catalina java process
 CATALINA_PID=/path/to/file/tomcat.pid
 export CATALINA_PID
 
@@ -133,11 +140,13 @@ export CATALINA_PID
 {{{
 <config>
 ...
+
   <param name="filter.SPNegoLoginFilter.class">com.logiclander.jaasmine.authentication.http.SPNegoFilter</param>
   <param name="filtermapping.SPNegoLoginFilter.1">/remoting/*</param>
   <param name="filter.JaasLoginFilter.class">com.logiclander.jaasmine.authentication.http.JaasLoginFilter</param>
   <param name="filter.JaasLoginFilter.loginPath">/WEB-INF/jsp/login.jsp</param>
   <param name="filtermapping.JaasLoginFilter.2">/*</param-->
+
 ...
 </config>
 }}}

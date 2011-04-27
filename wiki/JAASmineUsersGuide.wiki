@@ -137,7 +137,6 @@ export CATALINA_PID
  # restart tomcat
 
 {{{
-<config>
 ...
 
   <param name="filter.SPNegoLoginFilter.class">com.logiclander.jaasmine.authentication.http.SPNegoFilter</param>
@@ -147,5 +146,4 @@ export CATALINA_PID
   <param name="filtermapping.JaasLoginFilter.2">/*</param-->
 
 ...
-</config>
 }}}

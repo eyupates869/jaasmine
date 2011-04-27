@@ -26,7 +26,65 @@ create a service principal name (SPN) using the active directory users and compu
  # configure {{{jaas.conf}}} to accept SPNego tokens
  # copy {{{jaas.conf}}} to {{{$CATALINA_BASE/conf}}}
 {{{
-todo:show file
+/*
+ *
+ * jaas.conf
+ *
+ * A minimal configuration file for logins and SPNego token validation using
+ * jaasmine-core.
+ *
+ * In addition to the configuration below, set the following system properties
+ * at startup:
+ *
+ *     java.security.krb5.conf                 - Absolute path to the kerberos
+ *                                               config file
+ *
+ *     java.security.auth.login.config         - Absolute path to this file
+ *
+ *     javax.security.auth.useSubjectCredsOnly - Set this value to false
+ *
+ * Optional system properties may be set for debugging purposes:
+ *
+ *     sun.security.krb5.debug - writes debug messages for Sun's implementation
+ *                               of it's Kerberos APIs.
+ *
+ *     sun.security.jgss.debug - writes debug messages for Sun's implementation
+ *                               of it's GSS APIs.
+ *
+ */
+
+
+
+/*
+ * This module is configured using the default name.  At a minimum, it uses the
+ * com.sun.security.auth.module.Krb5LoginModule module class with the required
+ * flag set.
+ */
+jaasmine.login {
+    com.sun.security.auth.module.Krb5LoginModule
+    required;
+};
+
+/*
+ * This is the configuration needed to support SPNego token validation.
+ *
+ * The com.sun.security.auth.module.Krb5LoginModule module class should be used
+ * with the required flag set.  The following module options should be set:
+ *
+ * principal - a quoted string that is the server principal name
+ * storeKey  - set this to true
+ * useKeyTab - set this to true
+ * keyTab    - a quoted string that is the absolute path to the keytab file.
+ */
+com.sun.security.jgss.krb5.accept {
+    com.sun.security.auth.module.Krb5LoginModule
+    required
+    principal="HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU"
+    storeKey=true
+    useKeyTab=true
+//    keyTab="${catalina.base}${/}conf${/}machine-name.keytab";
+    keyTab="/path/to/file/service-username.keytab";
+};
 }}}
 
 *NOTE:* the keytab file path and name must match one created above
@@ -37,7 +95,17 @@ todo:show file
  # configure {{{krb5.conf}}} to accept SPNego tokens
  # copy {{{krb5.conf}}} to {{{$CATALINA_BASE/conf}}}
 {{{
-todo:show file
+[libdefaults]
+default_realm = AD.YOURDOMAIN.EDU
+forwardable = true
+proxiable = true
+
+[realms]
+AD.YOURDOMAIN.EDU = {
+ kdc = ad-dc-p1.ad.yourdomain.edu
+ kdc = ad-dc-p2.ad.yourdomain.edu
+ admin_server = ad-dc-p1.ad.yourdomain.edu
+ }
 }}}
 
 == create setenv.sh =
@@ -58,8 +126,8 @@ todo:show file
 = Securing uPortal with JAASmine =
 
 = Securing Kuali Rice with JAASmine =
- # deploy custom rice LoginFilter
+ # deploy custom rice {{{LoginFilter}}}
  # add JAASmine login filter
- # configure web.xml for rice
- # update rice-config.xml to use the LoginFilter
+ # configure {{{web.xml}}} for rice
+ # update {{{rice-config.xml}}} to use the {{{LoginFilter}}}
  # restart tomcat

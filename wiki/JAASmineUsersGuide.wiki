@@ -22,12 +22,12 @@ create a keytab using the ktpass utility at windows command line: {{{ktpass -pri
 = Securing uPortal with JAASmine =
 
 = Securing Kuali Rice with JAASmine =
-# add {{jaas.conf}} & {{krb5.conf}} for accepting SPNego tokens
-# add a keytab file
-# update setenv.sh to take the system props needed for krb5 authN
-# disable Location directive for Apache/Bluestem
-# deploy custom rice LoginFilter
-# add JAASmine login filter
-# configure web.xml for rice
-# update rice-config.xml to use the LoginFilter
-# restart tomcat
+ # add {{jaas.conf}} & {{krb5.conf}} for accepting SPNego tokens
+ # add a keytab file
+ # update setenv.sh to take the system props needed for krb5 authN
+ # disable Location directive for Apache/Bluestem
+ # deploy custom rice LoginFilter
+ # add JAASmine login filter
+ # configure web.xml for rice
+ # update rice-config.xml to use the LoginFilter
+ # restart tomcat

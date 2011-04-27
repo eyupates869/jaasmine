@@ -15,7 +15,7 @@ create a service principal name (SPN) using the active directory users and compu
  # copy keytab to {{{$CATALINA_BASE/conf}}}
 
 {{{
-ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURREALM\service-username$ -mapop set +rndPass -out s:\path-to-file\service-username.keytab -crypto RC4-HMAC-NT
+ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURREALM\service-username$ -mapop set +rndPass -out s:\path\to\file\service-username.keytab -crypto RC4-HMAC-NT
 }}}
 
 *NOTE:* to specify a password, use the -pass parameter (followed by the password), rather than using the +rndPass parameter, which randomly generates one.

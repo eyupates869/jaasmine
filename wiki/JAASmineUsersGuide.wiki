@@ -5,21 +5,29 @@
 
 = Getting Started =
 All JAASmine use cases share a few fundamental requirements:
-== create a kerberos account ==
-(using active directory users and computers administration application)
+== create a SPN ==
+create a service principal name (SPN) using the active directory users and computers administration application.  we recommend creating a computer account with a non-expiring password.
 
 *NOTE:* when needing to use encryption type des-cbc-md5, you should create a user account rather than a computer account, as this cannot be set for a computer type account
 
 == create a keytab ==
-(using ktpass utility at windows command line):
-
-{{{ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURREALM\service-username$ -mapop set +rndPass -out s:\path-to-file\service-username.keytab -crypto RC4-HMAC-NT}}}
+create a keytab using the ktpass utility at windows command line: {{{ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURREALM\service-username$ -mapop set +rndPass -out s:\path-to-file\service-username.keytab -crypto RC4-HMAC-NT}}}
 
 *NOTE:* to specify a password, use the -pass parameter (followed by the password), rather than using the +rndPass parameter, which randomly generates one.
 
+*NOTE:* to inspect the SPNs specify the list option on the setspn utility at the windows command line ({{{setspn -L service-username}}})
 
 = Securing Web Services with JAASmine =
 
 = Securing uPortal with JAASmine =
 
 = Securing Kuali Rice with JAASmine =
+# add {{jaas.conf}} & {{krb5.conf}} for accepting SPNego tokens
+# add a keytab file
+# update setenv.sh to take the system props needed for krb5 authN
+# disable Location directive for Apache/Bluestem
+# deploy custom rice LoginFilter
+# add JAASmine login filter
+# configure web.xml for rice
+# update rice-config.xml to use the LoginFilter
+# restart tomcat

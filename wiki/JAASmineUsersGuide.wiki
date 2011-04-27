@@ -23,8 +23,8 @@ create a service principal name (SPN) using the active directory users and compu
 *NOTE:* the computer account must match the one created above
 
 == create a jaas.conf ==
-# configure {{{jaas.conf}}} to accept SPNego tokens
-# copy {{{jaas.conf}}} to {{{$CATALINA_BASE/conf}}}
+ # configure {{{jaas.conf}}} to accept SPNego tokens
+ # copy {{{jaas.conf}}} to {{{$CATALINA_BASE/conf}}}
 {{{
 todo:show file
 }}}
@@ -34,15 +34,15 @@ todo:show file
 *NOTE:* the principal must match the SPN specified in the keytab created above
 
 == create krb5.conf ==
-# configure {{{krb5.conf}}} to accept SPNego tokens
-# copy {{{krb5.conf}}} to {{{$CATALINA_BASE/conf}}}
+ # configure {{{krb5.conf}}} to accept SPNego tokens
+ # copy {{{krb5.conf}}} to {{{$CATALINA_BASE/conf}}}
 {{{
 todo:show file
 }}}
 
 == create setenv.sh =
-# configure {{{setenv.sh}}} to take the system props needed for krb5 authN
-# copy {{{setenv.sh}}} to {{{$CATALINA_BASE/bin}}}
+ # configure {{{setenv.sh}}} to take the system props needed for krb5 authN
+ # copy {{{setenv.sh}}} to {{{$CATALINA_BASE/bin}}}
 {{{
 todo:show file
 }}}

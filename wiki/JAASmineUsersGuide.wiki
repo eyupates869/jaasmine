@@ -31,35 +31,7 @@ ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURRE
  # copy {{{jaas.conf}}} to {{{$CATALINA_BASE/conf}}}
 
 {{{
-/*
- *
- * jaas.conf
- *
- * A minimal configuration file for logins and SPNego token validation using
- * jaasmine-core.
- *
- * In addition to the configuration below, set the following system properties
- * at startup:
- *
- *     java.security.krb5.conf                 - Absolute path to the kerberos
- *                                               config file
- *
- *     java.security.auth.login.config         - Absolute path to this file
- *
- *     javax.security.auth.useSubjectCredsOnly - Set this value to false
- *
- * Optional system properties may be set for debugging purposes:
- *
- *     sun.security.krb5.debug - writes debug messages for Sun's implementation
- *                               of it's Kerberos APIs.
- *
- *     sun.security.jgss.debug - writes debug messages for Sun's implementation
- *                               of it's GSS APIs.
- *
- */
-
-
-
+...
 /*
  * This module is configured using the default name.  At a minimum, it uses the
  * com.sun.security.auth.module.Krb5LoginModule module class with the required
@@ -90,6 +62,7 @@ com.sun.security.jgss.krb5.accept {
 //    keyTab="${catalina.base}${/}conf${/}machine-name.keytab";
     keyTab="/path/to/file/service-username.keytab";
 };
+...
 }}}
 
 *NOTE:* the keytab file path and name must match one created above
@@ -120,28 +93,20 @@ AD.YOURDOMAIN.EDU = {
 
 {{{
 ...
-# Enable JAAS/KRB5 authn/z
-#
+# Enable JAAS/KRB5 authN/authZ
 CATALINA_OPTS="$CATALINA_OPTS -Djava.security.krb5.conf=/path/to/file/krb5.conf"
 CATALINA_OPTS="$CATALINA_OPTS -Djava.security.auth.login.config=/path/to/file/jaas.conf"
 
 # Enable debugging of Sun's krb5 login module & GSSAPI
-#
 CATALINA_OPTS="$CATALINA_OPTS -Dsun.security.krb5.debug=true"
 CATALINA_OPTS="$CATALINA_OPTS -Dsun.security.jgss.debug=true"
 
 # From <URL:http://forums.oracle.com/forums/thread.jspa?threadID=867326>
-#
 CATALINA_OPTS="$CATALINA_OPTS -Djavax.security.auth.useSubjectCredsOnly=false"
 
 export CATALINA_OPTS
 
-
-################################################################################
-#
-#  CATALINA_PID  Path of the file which should contain the pid of catalina
-#                startup java process, when start is used
-#
+# CATALINA_PID  Path of the file which should contain the pid of catalina startup java process, when start is used
 CATALINA_PID=/path/to/file/tomcat.pid
 export CATALINA_PID
 

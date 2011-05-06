@@ -127,7 +127,7 @@ export CATALINA_PID
 
 = Securing Web Services with JAASmine =
  # Follow the steps in the [JAASmineUsersGuide#Getting_Started] section for your server.
- # Deploy _jaasmine-core.jar_ with your web application or in the application shared classloader.
+ # Deploy _jaasmine-core.jar_ with your web application or in the application server's shared/common classloader.
  # Add this servlet filter in your _WEB-INF/web.xml_ file:
 {{{
     <filter>

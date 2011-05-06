@@ -126,6 +126,17 @@ export CATALINA_PID
 *NOTE:* the path to {{{CATALINA_PID}}} will vary
 
 = Securing Web Services with JAASmine =
+ # Follow the steps in the [JAASmineUsersGuide#Getting_Started] section for your server.
+ # Deploy _jaasmine-core.jar_ with your web application or in the application shared classloader.
+ # Add this servlet filter in your _WEB-INF/web.xml_ file:
+{{{
+    <filter>
+        <filter-name>SPNegoFilter</filter-name>
+        <filter-class>com.logiclander.jaasmine.authentication.http.SPNegoFilter</filter-class>
+    </filter>
+}}}
+ # Set up the appropriate filter-mappings for your application's web services.  Be sure to map all the url-patterns to your web services.
+ # Restart Tomcat.
 
 = Securing uPortal with JAASmine =
 

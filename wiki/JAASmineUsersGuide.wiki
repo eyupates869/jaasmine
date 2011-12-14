@@ -8,6 +8,8 @@ All JAASmine use cases share a few fundamental requirements:
 == create a SPN ==
 create a service principal name (SPN) using the active directory users and computers administration application.  we recommend creating a computer account with a non-expiring password.
 
+*NOTE:* SPNs are used to locate a target principal name for running a service.
+
 *NOTE:* the computer name (NetBIOS name) is limited to 15 characters.  the active directory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
 
 *NOTE:* when needing to use encryption type des-cbc-md5, you should create a user account rather than a computer account, as this cannot be set for a computer type account
@@ -22,7 +24,7 @@ ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURRE
 
 *NOTE:* to specify a password, use the -pass parameter (followed by the password), rather than using the +rndPass parameter, which randomly generates one.
 
-*NOTE:* to inspect the SPNs specify the list option on the setspn utility at the windows command line ({{{setspn -L service-username}}})
+*NOTE:* to inspect the SPNs specify the list option on the setspn utility at the windows command line ({{{setspn -L service-username}}}).  The setspn command-line tool allows you to list and update (add, delete, reset) the SPNs directory property for an AD service account. Updating SPNs is rarely required (i.e. computer name change, requires the SPNs for installed services to be changed to match it.)
 
 *NOTE:* the principal must match to machine name (is this true?)
 

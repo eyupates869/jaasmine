@@ -8,6 +8,8 @@ All JAASmine use cases share a few fundamental requirements:
 == create a SPN ==
 create a service principal name (SPN) using the active directory users and computers administration application.  we recommend creating a computer account with a non-expiring password.
 
+*NOTE:* the computer name (NetBIOS name) is limited to 15 characters.  the active directory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
+
 *NOTE:* when needing to use encryption type des-cbc-md5, you should create a user account rather than a computer account, as this cannot be set for a computer type account
 
 == create a keytab ==

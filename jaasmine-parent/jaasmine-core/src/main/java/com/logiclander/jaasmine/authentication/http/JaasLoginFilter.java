@@ -16,9 +16,8 @@
 
 package com.logiclander.jaasmine.authentication.http;
 
-import com.logiclander.jaasmine.authentication.AuthenticationService;
-import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
 import java.io.IOException;
+
 import javax.security.auth.Subject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,8 +29,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.logiclander.jaasmine.authentication.AuthenticationService;
+import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
 
 /**
  * Checks incoming ServletRequests and ServletResponses for authentication.
@@ -123,7 +127,9 @@ public class JaasLoginFilter implements Filter {
      */
     private boolean setRemoteUserOnLogin;
 
-    
+
+    private boolean isUsingBasicAuthentication;
+
     /**
      * {@inheritDoc}
      *
@@ -164,6 +170,8 @@ public class JaasLoginFilter implements Filter {
         setRemoteUserOnLogin = Boolean.parseBoolean(setRemoteUserOnLoginParam);
 
         filterName = filterConfig.getFilterName();
+
+        isUsingBasicAuthentication = Boolean.valueOf(filterConfig.getInitParameter("setBasicAuth"));
 
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s initialized", toString()));
@@ -208,7 +216,7 @@ public class JaasLoginFilter implements Filter {
      *  <LI>Dispatch to {@code loginServletName} if neither of the above are
      * set./LI>
      * </OL>
-     * 
+     *
      * @param request the ServletRequest
      * @param response the ServletResponse
      * @param chain the FilterChain
@@ -216,13 +224,13 @@ public class JaasLoginFilter implements Filter {
      * @throws ServletException if a processing error occurs in the FilterChain
      */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, 
+    public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
 
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s: entering doFilter", filterName));
         }
-        
+
         if (!(request instanceof HttpServletRequest) &&
             !(response instanceof HttpServletResponse)) {
 
@@ -244,10 +252,14 @@ public class JaasLoginFilter implements Filter {
 
             try {
 
+            	if (! hasRequestUri(httpReq)) {
+            		cacheRequestUri(httpReq);
+            	}
+
                 boolean canExecute = hasCredentials(httpReq);
 
                 // Attempt to login the user and obtain a Subject.
-                
+
                 if (!canExecute) {
                     canExecute = login(httpReq);
                 }
@@ -256,11 +268,12 @@ public class JaasLoginFilter implements Filter {
 
                     // The Subject was found which means the user has a valid
                     // credential (Subject).  Processing can continue.
-                    
+
+                	// TODO: always wrap request, set to cached requestURI
                     HttpServletRequest sendOn = httpReq;
 
                     if (setRemoteUserOnLogin) {
-                        sendOn = new JaasmineHttpServletRequest(httpReq, 
+                        sendOn = new JaasmineHttpServletRequest(httpReq,
                                     getSubject(httpReq));
                         logger.debug(String.format("Wrapping request in %s",
                                 sendOn.toString()));
@@ -274,7 +287,7 @@ public class JaasLoginFilter implements Filter {
                     // No Subject found, need to dispatch to someplace to gather
                     // the user's credentials and attempt a login on the
                     // next request.
-                    
+
                     RequestDispatcher loginDispatcher = null;
                     if (!loginPath.equals(EMPTY_STRING)) {
 
@@ -287,7 +300,7 @@ public class JaasLoginFilter implements Filter {
                             logger.debug(String.format("Dispatching login "
                                     + "request to path %s", loginPath));
                         }
-                        
+
                     } else if (!loginRedirect.equals(EMPTY_STRING)) {
 
                         if (logger.isDebugEnabled()) {
@@ -295,8 +308,19 @@ public class JaasLoginFilter implements Filter {
                                     + "request to %s", loginRedirect));
                         }
                         httpResp.sendRedirect(loginRedirect);
+
+
+                        // TODO: cache incoming requestURI
+
                         return;
 
+                    } else if (isUsingBasicAuthentication) {
+
+                        String s = "Basic realm=\"Jaasmine\"";
+                        httpResp.setHeader("WWW-Authenticate", s);
+                        httpResp.setStatus(401);
+
+                        return;
                     } else {
 
                         loginDispatcher =
@@ -327,7 +351,7 @@ public class JaasLoginFilter implements Filter {
 
                             // First, is there a loginPath set, but nowhere to
                             // send it to?
-                            
+
                             msg =
                                 String.format("loginPath set to %s, but no "
                                     + "resource is available to dispatch to",
@@ -337,7 +361,7 @@ public class JaasLoginFilter implements Filter {
                             // Is JaasLoginServlet (or the servlet-name
                             // specified by loginServletName) not configured in
                             // the web.xml?
-                        
+
                             msg =
                                 String.format("Servlet named %s specified by "
                                 + "the loginServletName is not configured in "
@@ -402,6 +426,36 @@ public class JaasLoginFilter implements Filter {
 
     /**
      * @param req an HttpServletRequest
+     * @return true if the session has been established AND the request URI is cached.
+     */
+    private boolean hasRequestUri(HttpServletRequest req) {
+
+    	HttpSession sess = req.getSession(false);
+    	if (sess == null) {
+    		return false;
+    	}
+
+    	String requestURI =
+    		(String) sess.getAttribute(AuthenticationService.REQUEST_URI_KEY);
+
+    	return (requestURI != null);
+    }
+
+
+    private void cacheRequestUri(HttpServletRequest req) {
+
+    	HttpSession sess = req.getSession();
+
+    	sess.setAttribute(AuthenticationService.REQUEST_URI_KEY, req.getRequestURI());
+
+    	if (req.getQueryString() != null) {
+    		sess.setAttribute(AuthenticationService.REQUST_QUERY_KEY, req.getQueryString());
+    	}
+    }
+
+
+    /**
+     * @param req an HttpServletRequest
      * @return true if the credentials are present on the request.
      */
     private boolean hasCredentials(HttpServletRequest req) {
@@ -439,6 +493,29 @@ public class JaasLoginFilter implements Filter {
         String password = request.getParameter("password");
         boolean subjectObtained = false;
 
+        if (username == null && password == null) {
+
+        	String basic = request.getHeader("Authorization");
+
+        	if (basic != null) {
+
+        		String[] hTokens = basic.split(" ");
+
+	        	String decoded = new String(Base64.decodeBase64(hTokens[1]));
+
+	        	String[] aTokens = decoded.split(":");
+	        	username = aTokens[0];
+
+	        	// Allow for the possibility of a machine-based login w/out a
+	        	// password
+	        	if (aTokens.length > 1) {
+	        		password = aTokens[1];
+	        	} else {
+	        		password = "";
+	        	}
+        	}
+        }
+
         if (username == null || username.isEmpty()) {
 
             logger.debug("username is missing");
@@ -446,11 +523,11 @@ public class JaasLoginFilter implements Filter {
 
         }
 
-        if (password == null || password.isEmpty()) {
-
-            logger.debug("password is missing");
-            return subjectObtained;
-        }
+//        if (password == null || password.isEmpty()) {
+//
+//            logger.debug("password is missing");
+//            return subjectObtained;
+//        }
 
         AuthenticationService as = new SimpleAuthenticationService(appName);
         Subject s = as.login(username, password.toCharArray());
@@ -462,7 +539,7 @@ public class JaasLoginFilter implements Filter {
             HttpSession sess = request.getSession();
             sess.setAttribute(AuthenticationService.SUBJECT_KEY, s);
         }
-        
+
         return subjectObtained;
     }
 

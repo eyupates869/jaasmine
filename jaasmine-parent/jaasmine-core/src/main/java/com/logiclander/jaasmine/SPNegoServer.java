@@ -15,7 +15,7 @@
  */
 package com.logiclander.jaasmine;
 
-import static com.logiclander.jaasmine.JAASMineContants.*;
+import static com.logiclander.jaasmine.JAASMineContants.SPNEGO_MECH_OID;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
@@ -24,6 +24,7 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
@@ -32,62 +33,104 @@ import org.ietf.jgss.Oid;
  */
 public class SPNegoServer {
 
-  /** An empty byte array to return (avoids null pointer exceptions).*/
-  private transient static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-  private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
-  private final GSSManager gssManager = GSSManager.getInstance();
-  private final GSSCredential gssServerCred;
-  private final byte[] responseToken;
-  private final boolean isValidToken;
-  private final boolean canDelegateToken;
-  private final GSSCredential gssDelegateCred;
-    private final Log logger = LogFactory.getLog(SPNegoServer.class);
+	/** An empty byte array to return (avoids null pointer exceptions). */
+	private transient static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+	private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
+	private final GSSManager gssManager = GSSManager.getInstance();
+	private final GSSCredential gssServerCred;
+	private final byte[] responseToken;
+	private final boolean isValidToken;
+	private final boolean canDelegateToken;
+	private final GSSCredential gssDelegateCred;
 
-  public SPNegoServer(String spnegoToken)
-          throws GSSException {
-    GSSContext gssContext = null;
-    byte[] requestToken = Base64.decodeBase64(spnegoToken);
+	private final GSSName requesterName;
 
-    try {
-        gssServerCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoMechOid, GSSCredential.ACCEPT_ONLY);
-        gssContext = gssManager.createContext(gssServerCred);
-        responseToken = gssContext.acceptSecContext(requestToken, 0, requestToken.length);
-        isValidToken = gssContext.isEstablished();
-        canDelegateToken = gssContext.getCredDelegState();
-        if (canDelegateToken) {
-          gssDelegateCred = gssContext.getDelegCred();
-        } else {
-          gssDelegateCred = null;
-        }
-    } finally {
+	private final Log logger = LogFactory.getLog(SPNegoServer.class);
 
-        if (gssContext != null) {
-          logger.debug("Disposing context");
-          gssContext.dispose();
-        }
-    }
-  }
+	public SPNegoServer(String spnegoToken) throws GSSException {
 
-  public boolean isValidToken() {
-    return isValidToken;
-  }
+		GSSContext gssContext = null;
 
-  public boolean canDelegateToken() {
-    return canDelegateToken;
-  }
+		try {
 
-  public GSSCredential getDelegatedCredential() {
-    return gssDelegateCred;
-  }
+			gssServerCred = createServerCredential();
+			gssContext = createServerContext(gssServerCred);
+			responseToken = createResponseToken(gssContext, spnegoToken);
 
-  public byte[] getResponseToken() {
-    return responseToken;
-  }
+			isValidToken = gssContext.isEstablished();
 
-  public String generateDelegateSPNegoToken(String spn)
-         throws GSSException {
-    SPNegoClient client = new SPNegoClient(gssDelegateCred);
-    return client.generateSPNegoToken(spn);
-  }
+			canDelegateToken = gssContext.getCredDelegState();
+			gssDelegateCred = getDelegateCredential(gssContext);
+
+			requesterName = gssContext.getSrcName();
+
+		} finally {
+
+			if (gssContext != null) {
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("Disposing context");
+				}
+				gssContext.dispose();
+			}
+
+		}
+	}
+
+	private GSSCredential getDelegateCredential(GSSContext ctx)
+			throws GSSException {
+
+		GSSCredential delegate = null;
+
+		if (canDelegateToken) {
+			delegate = ctx.getDelegCred();
+		}
+
+		return delegate;
+	}
+
+	private GSSContext createServerContext(GSSCredential serverCredential)
+			throws GSSException {
+		return gssManager.createContext(serverCredential);
+	}
+
+	private GSSCredential createServerCredential() throws GSSException {
+		return gssManager.createCredential(null,
+				GSSCredential.DEFAULT_LIFETIME, spnegoMechOid,
+				GSSCredential.ACCEPT_ONLY);
+	}
+
+	private byte[] createResponseToken(GSSContext ctx, String spnegoToken)
+			throws GSSException {
+
+		byte[] spnegoTokenBytes = Base64.decodeBase64(spnegoToken);
+		return ctx.acceptSecContext(spnegoTokenBytes, 0,
+				spnegoTokenBytes.length);
+	}
+
+	public boolean isValidToken() {
+		return isValidToken;
+	}
+
+	public boolean canDelegateToken() {
+		return canDelegateToken;
+	}
+
+	public GSSCredential getDelegatedCredential() {
+		return gssDelegateCred;
+	}
+
+	public byte[] getResponseToken() {
+		return responseToken;
+	}
+
+	public GSSName getRequesterName() throws GSSException {
+		return requesterName;
+	}
+
+	public String generateDelegateSPNegoToken(String spn) throws GSSException {
+		SPNegoClient client = new SPNegoClient(gssDelegateCred);
+		return client.generateSPNegoToken(spn);
+	}
 
 }

@@ -16,9 +16,8 @@
 
 package com.logiclander.jaasmine.authentication.http;
 
-import com.logiclander.jaasmine.SPNegoServer;
-import com.logiclander.jaasmine.authentication.AuthenticationService;
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -27,9 +26,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSException;
+
+import com.logiclander.jaasmine.SPNegoServer;
+import com.logiclander.jaasmine.authentication.AuthenticationService;
 
 /**
  * Checks incoming ServletRequests and ServletResponses for authentication.
@@ -101,9 +104,9 @@ public class SPNegoFilter implements Filter {
      *  <LI>The HttpServletRequest is checked for a {@code WWW-Authenticate}
      * request header.  If found, it is checked for the scheme used, which must
      * be set to {@code Negotiate}.</LI>
-     *  <LI>If found, the SPNego token is decoded and validated.  If it is 
-     * valid, processing is allowed to continue.  If not, processing will stop 
-     * and an HTTP 401 is returned with a {@code WWW-Authenticate} request 
+     *  <LI>If found, the SPNego token is decoded and validated.  If it is
+     * valid, processing is allowed to continue.  If not, processing will stop
+     * and an HTTP 401 is returned with a {@code WWW-Authenticate} request
      * header set to {@code Negotiate}.</LI>
      *  <LI>If the request header is not found, an HTTP 401 is returned with a
      * {@code WWW-Authenticate} request header set to {@code Negotiate}.</LI>
@@ -116,13 +119,13 @@ public class SPNegoFilter implements Filter {
      * @throws ServletException if a processing error occurs in the FilterChain
      */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, 
+    public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
 
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s: entering doFilter", filterName));
         }
-        
+
         if (!(request instanceof HttpServletRequest) &&
                 !(response instanceof HttpServletResponse)) {
 
@@ -142,11 +145,19 @@ public class SPNegoFilter implements Filter {
             String sPNegoToken = getSPNegoToken(httpReq);
             boolean canExecute = false;
             SPNegoServer server = null;
-            
+
             try {
 
                 server = new SPNegoServer(sPNegoToken);
                 canExecute = server.isValidToken();
+
+                // Wrap the HttpServletRequest with the requester's GSSName
+                // so that additional processing can take place w/out having
+                // to re-examine the SPNego token.
+                httpReq = new JaasmineHttpServletRequest(
+            		httpReq,
+            		server.getRequesterName()
+            	);
 
             } catch (GSSException ex) {
 
@@ -160,12 +171,21 @@ public class SPNegoFilter implements Filter {
                          ex.getMessage()));
 
                 }
+
                 canExecute = false;
+
+            } catch (Exception ex) {
+
+            	if (logger.isFatalEnabled()){
+            		logger.fatal(ex.getMessage(), ex);
+            	}
+
+            	canExecute = false;
+
             }
 
             if (canExecute) {
 
-                // TODO: create Subject?
                 chain.doFilter(httpReq, httpResp);
 
             } else {
@@ -213,9 +233,23 @@ public class SPNegoFilter implements Filter {
         }
 
         // Split "Negotiate [SPNego_TOKEN]" by the space and return the token.
-        String token = headerValue.split(" ", 2)[1];
 
-        logger.debug(String.format("%nSPNego token%n%s%n", token));
+        String token = "";
+
+        try {
+
+        	token = headerValue.split(" ", 2)[1];
+
+        } catch (RuntimeException t) {
+
+        	logger.fatal(t.getMessage(), t);
+        	throw t;
+
+        }
+
+        if (logger.isDebugEnabled()) {
+        	logger.debug(String.format("%nSPNego token%n%s%n", token));
+        }
 
         return token;
     }

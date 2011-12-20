@@ -18,9 +18,12 @@ package com.logiclander.jaasmine.authentication.http;
 
 import java.security.Principal;
 import java.util.Set;
+
 import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
+import org.ietf.jgss.GSSName;
 
 /**
  * Custom HttpServletRequestWrapper for accessing Jaasmine constructs via the
@@ -35,7 +38,7 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
 
     /**
      * Constructs a new JaasmineHttpServletRequest.
-     * 
+     *
      * @param toWrap the HttpServletRequest to wrap
      * @param user the name of the user.
      */
@@ -46,6 +49,14 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
         Set<Principal> principals = subject.getPrincipals();
         userPrincipal = principals.iterator().next();
 
+    }
+
+
+    JaasmineHttpServletRequest(HttpServletRequest toWrap, GSSName name) {
+    	super(toWrap);
+    	this.wrapped = toWrap;
+
+    	userPrincipal = new GSSNamePrincipal(name);
     }
 
 
@@ -80,4 +91,34 @@ class JaasmineHttpServletRequest extends HttpServletRequestWrapper {
                 this.getRemoteUser());
     }
 
+
+    private static final class GSSNamePrincipal implements Principal {
+
+    	private final GSSName name;
+
+    	GSSNamePrincipal(GSSName name) {
+    		this.name = name;
+    	}
+
+		@Override
+		public String getName() {
+			return name.toString();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return name.equals(other);
+		}
+
+		@Override
+		public int hashCode() {
+			return name.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return name.toString();
+		}
+
+    }
 }

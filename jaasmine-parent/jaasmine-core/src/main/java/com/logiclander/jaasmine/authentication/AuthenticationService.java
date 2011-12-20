@@ -32,6 +32,12 @@ public interface AuthenticationService {
             "__com.logiclander.jaasmine.authentication.SUBJECT";
 
 
+    public static final String REQUEST_URI_KEY =
+    		"__com.logiclander.jaasmine.REQUEST_URI";
+    
+    public static final String REQUST_QUERY_KEY =
+    		"__com.logiclander.jaasmine.REQUEST_QUERY";
+
     /**
      * The default application name for a configuration used by JAAS during the
      * authentication process.
@@ -39,7 +45,7 @@ public interface AuthenticationService {
     public static final String DEFAULT_JAASMINE_LOGIN_CONFIG =
             "jaasmine.login";
 
-    
+
     /**
      * Returns the Subject for the given credentials or null if the login fails
      * fails.
@@ -50,7 +56,7 @@ public interface AuthenticationService {
      */
     public Subject login(String userId, char[] password);
 
-    
+
     /**
      * Logout the given Subject
      *

@@ -17,27 +17,31 @@
 package com.logiclander.jaasminetest;
 
 import java.io.IOException;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.logiclander.jaasmine.authentication.AuthenticationService;
 
 /**
- * Example of a Login Servlet.  This servlet is named JaasLoginServlet in the 
- * web.xml per the defaults of the JaasLoginFilter, which will dispatch to here 
- * if the request is not authenticated.  Servlets like these can be used for 
+ * Example of a Login Servlet.  This servlet is named JaasLoginServlet in the
+ * web.xml per the defaults of the JaasLoginFilter, which will dispatch to here
+ * if the request is not authenticated.  Servlets like these can be used for
  * post JAAS authentication processing, such as establishing application
  * specific session information.
- * 
- * A GET to this servlet means that JaasLoginFilter did not find the user's 
+ *
+ * A GET to this servlet means that JaasLoginFilter did not find the user's
  * Subject so the request will be forwarded to /WEB-INF/jsp/login.jsp to gather
  * the user's login credentials.
- * 
+ *
  * A POST to this servlet means that JaasLoginFilter has accepted the login
  * credentials from the user and a Subject was obtained from the configured
  * store.
- * 
+ *
  * @author <a href="mailto:andy@logiclander.com">Andy Gherna</a>
  */
 public class LoginCheckServlet extends HttpServlet {
@@ -48,7 +52,7 @@ public class LoginCheckServlet extends HttpServlet {
     private static final String LOGIN_JSP = "/WEB-INF/jsp/login.jsp";
 
     /**
-     * Handles HTTP POST.  
+     * Handles HTTP POST.
      *
      * @param request the HttpServletRequest
      * @param response the HttpServletResponse
@@ -59,17 +63,30 @@ public class LoginCheckServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request,
         HttpServletResponse response) throws ServletException, IOException {
 
-        StringBuilder sb =
-                new StringBuilder(request.getContextPath());
-        response.sendRedirect(
-            sb.append(DEFAULT_REDIRECT_AFTER_LOGIN).toString()
-        );
+        HttpSession sess = request.getSession();
+
+        String originalRequestUri =
+    		(String) sess.getAttribute(AuthenticationService.REQUEST_URI_KEY);
+
+        if (originalRequestUri != null) {
+
+        	response.sendRedirect(originalRequestUri);
+
+        } else {
+
+            StringBuilder sb =
+                    new StringBuilder(request.getContextPath());
+
+	        response.sendRedirect(
+	            sb.append(DEFAULT_REDIRECT_AFTER_LOGIN).toString()
+	        );
+        }
         return;
     }
 
 
     /**
-     * Handles HTTP GET.  
+     * Handles HTTP GET.
      *
      * @param request the HttpServletRequest
      * @param response the HttpServletResponse
@@ -95,5 +112,5 @@ public class LoginCheckServlet extends HttpServlet {
     public String toString() {
         return getClass().getSimpleName();
     }
-    
+
 }

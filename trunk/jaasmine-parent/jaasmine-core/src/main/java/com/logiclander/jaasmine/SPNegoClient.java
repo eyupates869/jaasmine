@@ -16,11 +16,13 @@
 
 package com.logiclander.jaasmine;
 
-import static com.logiclander.jaasmine.JAASMineContants.*;
+import static com.logiclander.jaasmine.JAASMineContants.SPNEGO_MECH_OID;
 
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+
 import javax.security.auth.Subject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,87 +39,139 @@ import org.ietf.jgss.Oid;
  */
 public class SPNegoClient {
 
-  private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
-  private final GSSManager gssManager = GSSManager.getInstance();
-  private final GSSCredential gssClientCred;
-  private boolean credentialDelegationState = true;
-  private boolean mutualAuthenticationState = true;
-    private final Log logger = LogFactory.getLog(SPNegoClient.class);
+	private final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
+	private final GSSManager gssManager = GSSManager.getInstance();
+	private final GSSCredential gssClientCred;
+	private boolean credentialDelegationState = true;
+	private boolean mutualAuthenticationState = true;
+	private final Log logger = LogFactory.getLog(SPNegoClient.class);
 
-  public SPNegoClient(Subject subject, AuthenticationType type)
-          throws GSSException, PrivilegedActionException {
-    // create a GSS Credential using a JAAS Subject that has Kerberos ticket(s)
-    gssClientCred = (GSSCredential) Subject.doAs(subject, new CredentialGenerator(gssManager, type.getOidValue()));
-  }
+	public SPNegoClient(Subject subject, AuthenticationType type)
+			throws GSSException, PrivilegedActionException {
+		// create a GSS Credential using a JAAS Subject that has Kerberos
+		// ticket(s)
+		gssClientCred = Subject.doAs(
+			subject,
+			new CredentialGenerator(gssManager, type.getOidValue())
+		);
 
-  public SPNegoClient(GSSCredential credential)
-          throws GSSException {
-    // use existing (perhaps delegated) credential
-    gssClientCred = credential;
-  }
+	}
 
-  public boolean getCredentialDelegationState() {
-    return credentialDelegationState;
-  }
+	public SPNegoClient(GSSCredential credential) throws GSSException {
+		// use existing (perhaps delegated) credential
+		gssClientCred = credential;
+	}
 
-  // must be set prior to (initSecContext) generating first SPNegoToken
-  public void setCredentialDelegationState(boolean state) throws GSSException {
-    credentialDelegationState = state;
-  }
+	public boolean getCredentialDelegationState() {
+		return credentialDelegationState;
+	}
 
-  public boolean getMutualAuthenticationState() {
-    return mutualAuthenticationState;
-  }
+	// must be set prior to (initSecContext) generating first SPNegoToken
+	public void setCredentialDelegationState(boolean state) throws GSSException {
+		credentialDelegationState = state;
+	}
 
-  // must be set prior to (initSecContext) generating first SPNegoToken
-  public void setMutualAuthenticationState(boolean state) throws GSSException {
-    mutualAuthenticationState = state;
-  }
+	public boolean getMutualAuthenticationState() {
+		return mutualAuthenticationState;
+	}
 
-  public String generateSPNegoToken(String spn) throws GSSException {
-    if (gssClientCred == null) {
-        logger.debug("No credential found, returning an empty String");
-      return "";
-    }
-    byte[] spnegoToken = new byte[0];
-    GSSContext gssContext = null;
+	// must be set prior to (initSecContext) generating first SPNegoToken
+	public void setMutualAuthenticationState(boolean state) throws GSSException {
+		mutualAuthenticationState = state;
+	}
 
-    try {
-        // create target server Service Principal Name (SPN)
-        GSSName gssServerName = gssManager.createName(spn, GSSName.NT_USER_NAME);
-        //GSSName gssServerName = manager.createName(spn,GSSName.NT_HOSTBASED_SERVICE,spnegoMechOid);
-        // use the GSS Credential to create a SPNego Token for the target server
-        gssContext = gssManager.createContext(gssServerName.canonicalize(spnegoMechOid), spnegoMechOid, gssClientCred, GSSContext.DEFAULT_LIFETIME);
-        gssContext.requestCredDeleg(credentialDelegationState);
-        gssContext.requestMutualAuth(mutualAuthenticationState);
-        spnegoToken = gssContext.initSecContext(spnegoToken, 0, spnegoToken.length);
-        // return SPNegoToken to be inserted it into the HTTP header
-        return new String(Base64.encodeBase64(spnegoToken));
-      } finally {
+	public String generateSPNegoToken(String spn) throws GSSException {
 
-          if (gssContext != null) {
-              logger.debug("Disposing context");
-              gssContext.dispose();
-          }
-      }
-  }
+		String spnegoToken = "";
+		if (gssClientCred == null) {
 
-  private static class CredentialGenerator implements PrivilegedExceptionAction {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No credential found, returning an empty String");
+			}
+			return spnegoToken;
+		}
 
-    private final GSSManager gssManager;
-    private final Oid userMechOid;
+		GSSContext targetServerContext = null;
 
-    CredentialGenerator(GSSManager gssManager, String userMechOid) throws GSSException {
-      this.gssManager = gssManager;
-      this.userMechOid = new Oid(userMechOid);
-    }
+		try {
 
-    @Override
-    public GSSCredential run() throws GSSException {
-      final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
-      GSSCredential gssCred = gssManager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, userMechOid, GSSCredential.INITIATE_ONLY);
-      gssCred.add(null, GSSCredential.INDEFINITE_LIFETIME, GSSCredential.INDEFINITE_LIFETIME, spnegoMechOid, GSSCredential.INITIATE_ONLY);
-      return gssCred;
-    }
-  }
+			GSSName targetSPN = createTargetSPN(spn);
+			targetServerContext = createTargetServerContext(targetSPN);
+			spnegoToken = createTargetSPNegoToken(targetServerContext);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(
+					String.format("Generated SPNego token: %s", spnegoToken)
+				);
+			}
+
+		} finally {
+
+			if (targetServerContext != null) {
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("Disposing targetServerContext");
+				}
+				targetServerContext.dispose();
+			}
+		}
+
+		return spnegoToken;
+	}
+
+	private String createTargetSPNegoToken(GSSContext gssContext)
+			throws GSSException {
+
+		gssContext.requestCredDeleg(credentialDelegationState);
+		gssContext.requestMutualAuth(mutualAuthenticationState);
+
+		byte[] spnegoToken = new byte[0];
+		spnegoToken = gssContext.initSecContext(
+			spnegoToken,
+			0,
+			spnegoToken.length
+		);
+
+		return new String(Base64.encodeBase64(spnegoToken));
+	}
+
+	private GSSContext createTargetServerContext(GSSName gssServerName)
+			throws GSSException {
+
+		return gssManager.createContext(
+			gssServerName.canonicalize(spnegoMechOid),
+			spnegoMechOid,
+			gssClientCred,
+			GSSContext.DEFAULT_LIFETIME
+		);
+	}
+
+	private GSSName createTargetSPN(String spn) throws GSSException {
+		return gssManager.createName(spn, GSSName.NT_USER_NAME);
+	}
+
+	private static class CredentialGenerator implements
+			PrivilegedExceptionAction<GSSCredential> {
+
+		private final GSSManager gssManager;
+		private final Oid userMechOid;
+
+		CredentialGenerator(GSSManager gssManager, String userMechOid)
+				throws GSSException {
+			this.gssManager = gssManager;
+			this.userMechOid = new Oid(userMechOid);
+		}
+
+		@Override
+		public GSSCredential run() throws GSSException {
+			final Oid spnegoMechOid = new Oid(SPNEGO_MECH_OID);
+			GSSCredential gssCred = gssManager.createCredential(null,
+					GSSCredential.DEFAULT_LIFETIME, userMechOid,
+					GSSCredential.INITIATE_ONLY);
+			gssCred.add(null, GSSCredential.INDEFINITE_LIFETIME,
+					GSSCredential.INDEFINITE_LIFETIME, spnegoMechOid,
+					GSSCredential.INITIATE_ONLY);
+			return gssCred;
+		}
+	}
 }

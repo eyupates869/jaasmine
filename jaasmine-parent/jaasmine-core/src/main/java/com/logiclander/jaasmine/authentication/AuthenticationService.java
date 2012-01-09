@@ -31,7 +31,6 @@ public interface AuthenticationService {
     public static final String SUBJECT_KEY =
             "__com.logiclander.jaasmine.authentication.SUBJECT";
 
-
     public static final String REQUEST_URI_KEY =
     		"__com.logiclander.jaasmine.REQUEST_URI";
     

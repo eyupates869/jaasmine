@@ -18,21 +18,21 @@ package com.logiclander.jaasmine.authentication;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A default AuthenticationService implementation that authenticates users based
+ * A default AuthenticationService that authenticates users based
  * on userId and password, using a default
  * {@link javax.security.auth.callback.CallbackHandler CallbackHandler}.
  *
  * Instances of this class have a configurable commons-logging based logger
- * named 
+ * named
  * {@code com.logiclander.jaasmine.authentication.SimpleAuthenticationService}.
  */
-public class SimpleAuthenticationService implements AuthenticationService {
+public class SimpleAuthenticationService extends BaseAuthenticationService {
 
 
     /** The JAAS configuration to use for this instance. */
@@ -66,10 +66,8 @@ public class SimpleAuthenticationService implements AuthenticationService {
         try {
 
             CallbackHandler cbh = new SimpleCallbackHandler(userId, password);
-            LoginContext lc = new LoginContext(applicationName, cbh);
-            lc.login();
+            s = doLogin(applicationName, cbh);
 
-            s = lc.getSubject();
         } catch (LoginException ex) {
 
             if (logger.isInfoEnabled()) {
@@ -94,8 +92,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
 
         try {
 
-            LoginContext lc = new LoginContext(applicationName, s);
-            lc.logout();
+        	doLogout(applicationName, s);
 
         } catch (LoginException ex) {
 
@@ -104,7 +101,7 @@ public class SimpleAuthenticationService implements AuthenticationService {
                         String.format("Logout failed: %s", ex.getMessage());
                 logger.info(msg);
             }
-            
+
         }
     }
 

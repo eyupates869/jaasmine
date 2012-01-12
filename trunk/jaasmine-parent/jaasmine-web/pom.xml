@@ -7,17 +7,26 @@
     <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.logiclander.jaasmine</groupId>
   <artifactId>jaasmine-web</artifactId>
-  <version>1.0.0</version>
   <packaging>war</packaging>
   <name>jaasmine-web</name>
+  
   <repositories>
     <repository>
       <id>jboss</id>
-      <url>http://repository.jboss.org/maven2</url>
+      <name>jboss repo</name>
+      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
     </repository>
-  </repositories>
+    <repository>
+      <id>org.jboss.repository.release</id>
+      <name>JBoss Maven Release Repository</name>
+      <url>https://repository.jboss.org/nexus/content/repositories/releases</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+ </repositories>  
+  
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>

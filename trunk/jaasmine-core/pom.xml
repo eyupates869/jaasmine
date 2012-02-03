@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:pom="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pom="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>jaasmine</artifactId>
     <groupId>com.logiclander.jaasmine</groupId>
@@ -122,4 +121,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <scm>
+    <connection>scm:svn:http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-core</connection>
+    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-core</developerConnection>
+    <url>http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-core</url>
+  </scm>
 </project>

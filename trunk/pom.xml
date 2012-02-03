@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project xmlns:pom="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:pom="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.logiclander.jaasmine</groupId>
   <artifactId>jaasmine</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
   <name>jaasmine</name>
   <description>
@@ -26,9 +26,9 @@
     </license>
   </licenses>
   <scm>
-    <url>http://jaasmine.googlecode.com/svn/trunk/</url>
-    <connection>scm:svn:http://jaasmine.googlecode.com/svn/trunk/</connection>
-    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/trunk/</developerConnection>
+    <url>http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0</url>
+    <connection>scm:svn:http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0</connection>
+    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0</developerConnection>
   </scm>
   <developers>
     <developer>
@@ -42,7 +42,7 @@
     <module>jaasmine-core</module>
     <module>jaasmine-web</module>
   </modules>
-  <dependencies/>
+  <dependencies />
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

@@ -43,8 +43,7 @@ import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
  * This filter accepts the following init-params:
  * <UL>
  *  <LI>appName - the name of the application in the JAAS configuration.  This
- * parameter is optional.  The default value is
- * {@value AuthenticationService#DEFAULT_JAASMINE_LOGIN_CONFIG}</LI>
+ * parameter is optional.</LI>
  *  <LI>loginPath - if set, dispatch to this path in the web application.  This
  * can be a JSP, Servlet or HTML page.</LI>
  *  <LI>loginRedirect - if set, redirect to this URL for login processing and/or
@@ -52,12 +51,10 @@ import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
  * redirect is relative (that is, inside the web application), a servlet or
  * JSP must be mapped to the URL listed here in the web.xml file.</LI>
  *  <LI>loginServletName - the name of the Servlet that will be used to
- * collect user credentials.  This parameter is optional.  The default value is
- * {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}</LI>
+ * collect user credentials.  This parameter is optional.</LI>
  *  <LI>setRemoteUserOnLogin - when "true", calls to
  * {@link javax.servlet.http.HttpServletRequest#getRemoteUser() getRemoteUser}
- * will return the user name that was used by the user to log in.  The default
- * value is {@value #DEFAULT_SET_REMOTE_USER_ON_LOGIN}</LI>
+ * will return the user name that was used by the user to log in.</LI>
  * </UL>
  *
  * Requests that invoke this Filter must have parameters named {@code username}
@@ -90,9 +87,7 @@ public class JaasLoginFilter implements Filter {
 
 
     /**
-     * The application name for the configuration to use in the JAAS file.  The
-     * default value is
-     * {@value AuthenticationService#DEFAULT_JAASMINE_LOGIN_CONFIG}.
+     * The application name for the configuration to use in the JAAS file.
      */
     private String appName;
 

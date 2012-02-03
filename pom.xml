@@ -2,10 +2,10 @@
 <project xmlns:pom="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.logiclander.jaasmine</groupId>
-  <artifactId>jaasmine-parent</artifactId>
+  <artifactId>jaasmine</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <name>jaasmine-parent</name>
+  <name>jaasmine</name>
   <description>
     The JAASmine library is based in Java and implements functionality
     of Java Authentication and Authorization Services (JAAS), and applies

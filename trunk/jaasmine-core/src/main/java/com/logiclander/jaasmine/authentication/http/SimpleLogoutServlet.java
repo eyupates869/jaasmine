@@ -16,10 +16,9 @@
 
 package com.logiclander.jaasmine.authentication.http;
 
-import com.logiclander.jaasmine.authentication.AuthenticationService;
-import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.security.auth.Subject;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -27,8 +26,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.logiclander.jaasmine.authentication.AuthenticationService;
+import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
 
 /**
  * Logs out the Subject associated with the user's HttpSession.
@@ -36,8 +39,7 @@ import org.apache.commons.logging.LogFactory;
  * This filter accepts the following init-params:
  * <UL>
  *  <LI>appName - the name of the application in the JAAS configuration.  This
- * parameter is optional.  The default value is
- * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}</LI>
+ * parameter is optional.</LI>
  *  <LI>postLogoutProcessorName - the name of a Servlet in the {@code web.xml}
  * file of this web application that will handle any logout post processing.
  * This can be a Servlet or JSP that will render a message stating that the
@@ -58,9 +60,7 @@ public class SimpleLogoutServlet extends HttpServlet {
 
 
     /**
-     * The application name for the configuration to use in the JAAS file.  The
-     * default value is
-     * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}.
+     * The application name for the configuration to use in the JAAS file.
      */
     private String appName;
 
@@ -139,7 +139,7 @@ public class SimpleLogoutServlet extends HttpServlet {
         sess.invalidate();
 
         resp.setStatus(HttpServletResponse.SC_OK);
-        RequestDispatcher rd = 
+        RequestDispatcher rd =
             getServletContext().getNamedDispatcher(postLogoutProcessorName);
 
         if (rd != null) {

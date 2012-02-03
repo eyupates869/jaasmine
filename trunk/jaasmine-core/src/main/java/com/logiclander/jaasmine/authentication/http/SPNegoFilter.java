@@ -40,8 +40,7 @@ import com.logiclander.jaasmine.authentication.AuthenticationService;
  * This filter accepts the following init-params:
  * <UL>
  *  <LI>appName - the name of the application in the JAAS configuration.  This
- * parameter is optional.  The default value is
- * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}</LI>
+ * parameter is optional.</LI>
  * </UL>
  *
  * Requests that invoke this Filter must have a {@code Authorization} header
@@ -62,9 +61,7 @@ public class SPNegoFilter implements Filter {
 
 
     /**
-     * The application name for the configuration to use in the JAAS file.  The
-     * default value is
-     * {@value AuthenticationService#DEFAULT_JAAS_SPNEGO_CONFIG}.
+     * The application name for the configuration to use in the JAAS file.
      */
     private String appName;
 

@@ -76,12 +76,12 @@ public class JaasLoginFilter implements Filter {
             LogFactory.getLog(JaasLoginFilter.class);
 
 
-    /** The default value for the appName, which is {@value}.*/
+    /** The default value for the appName, which is "JaasLoginServlet".*/
     private static final String DEFAULT_NAMED_LOGIN_DISPATCHER =
             "JaasLoginServlet";
 
 
-    /** The default value for setRemoteUserOnLogin, which is {@value}.*/
+    /** The default value for setRemoteUserOnLogin, which is "false".*/
     private static final String DEFAULT_SET_REMOTE_USER_ON_LOGIN = "false";
 
 
@@ -115,15 +115,14 @@ public class JaasLoginFilter implements Filter {
 
 
     /**
-     * The name of the Servlet to use for post login processing.  The default
-     * value is {@value #DEFAULT_NAMED_LOGIN_DISPATCHER}.
+     * The name of the Servlet to use for post login processing.
      */
     private String loginServletName;
 
 
     /**
      * Flag indicating whether or not to set the REMOTE_USER on a successful
-     * login.  The default value is {@value #DEFAULT_SET_REMOTE_UESR_ON_LOGIN}.
+     * login.
      */
     private boolean setRemoteUserOnLogin;
 

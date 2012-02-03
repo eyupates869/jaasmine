@@ -6,7 +6,7 @@
     <version>7</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.logiclander.jaasmine</groupId>
+  <groupId>com.logiclander</groupId>
   <artifactId>jaasmine</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>

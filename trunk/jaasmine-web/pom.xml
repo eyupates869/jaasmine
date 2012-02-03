@@ -9,7 +9,6 @@
   <artifactId>jaasmine-web</artifactId>
   <packaging>war</packaging>
   <name>jaasmine-web</name>
-  
   <repositories>
     <repository>
       <id>jboss</id>
@@ -24,8 +23,7 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
- </repositories>  
-  
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>

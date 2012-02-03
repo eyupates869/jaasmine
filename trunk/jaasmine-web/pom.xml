@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jaasmine</artifactId>
     <groupId>com.logiclander.jaasmine</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jaasmine-web</artifactId>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>com.logiclander.jaasmine</groupId>
       <artifactId>jaasmine-core</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
@@ -118,10 +118,4 @@
     </plugins>
     <finalName>jaasmine-web</finalName>
   </build>
-
-  <scm>
-    <connection>scm:svn:http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-web</connection>
-    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-web</developerConnection>
-    <url>http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-web</url>
-  </scm>
 </project>

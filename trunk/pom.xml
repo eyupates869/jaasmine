@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.logiclander.jaasmine</groupId>
   <artifactId>jaasmine</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>jaasmine</name>
   <description>
@@ -26,9 +26,9 @@
     </license>
   </licenses>
   <scm>
-    <url>http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0</url>
-    <connection>scm:svn:http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0</connection>
-    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0</developerConnection>
+    <url>http://jaasmine.googlecode.com/svn/trunk/</url>
+    <connection>scm:svn:http://jaasmine.googlecode.com/svn/trunk/</connection>
+    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/trunk/</developerConnection>
   </scm>
   <developers>
     <developer>

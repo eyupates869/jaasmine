@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jaasmine</artifactId>
     <groupId>com.logiclander.jaasmine</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jaasmine-core</artifactId>
@@ -121,10 +121,4 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
-  <scm>
-    <connection>scm:svn:http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-core</connection>
-    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-core</developerConnection>
-    <url>http://jaasmine.googlecode.com/svn/tags/jaasmine-1.0.0/jaasmine-core</url>
-  </scm>
 </project>

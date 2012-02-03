@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
 <project xmlns:pom="http://maven.apache.org/POM/4.0.0">
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.logiclander.jaasmine</groupId>
   <artifactId>jaasmine</artifactId>
@@ -21,8 +26,9 @@
     </license>
   </licenses>
   <scm>
-    <url>https://jaasmine.googlecode.com/svn/trunk/</url>
-    <connection>scm:svn:https://jaasmine.googlecode.com/svn/trunk/</connection>
+    <url>http://jaasmine.googlecode.com/svn/trunk/</url>
+    <connection>scm:svn:http://jaasmine.googlecode.com/svn/trunk/</connection>
+    <developerConnection>scm:svn:https://jaasmine.googlecode.com/svn/trunk/</developerConnection>
   </scm>
   <developers>
     <developer>

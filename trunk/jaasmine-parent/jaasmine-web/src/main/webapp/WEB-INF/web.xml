@@ -67,6 +67,11 @@
         <filter-class>com.logiclander.jaasmine.authentication.http.SPNegoFilter</filter-class>
     </filter>
 
+	<filter>
+		<filter-name>GeneralAuthorizationFilter</filter-name>
+		<filter-class>com.logiclander.jaasmine.authentication.http.GeneralAuthorizationFilter</filter-class>
+	</filter>
+
     <!-- Send all web application requests through JaasLoginFilter -->
     <filter-mapping>
         <filter-name>JaasLoginFilter</filter-name>
@@ -94,7 +99,7 @@
 
     <!-- Send all web services requests through SPNegoFilter -->
     <filter-mapping>
-        <filter-name>SPNegoFilter</filter-name>
+        <filter-name>GeneralAuthorizationFilter</filter-name>
         <url-pattern>/wsdemo/*</url-pattern>
     </filter-mapping>
 

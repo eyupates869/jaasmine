@@ -6,7 +6,9 @@
 package com.logiclander.jaasmine;
 
 import java.security.Principal;
+
 import javax.security.auth.kerberos.KerberosPrincipal;
+
 import org.ietf.jgss.GSSCredential;
 
 /**
@@ -26,7 +28,7 @@ public class SPNegoPrincipal implements Principal {
     /**
      *
      */
-    public SPNegoPrincipal(final String name, 
+    public SPNegoPrincipal(final String name,
             final GSSCredential delegatedCred) {
 
         this.krbPrincipal = new KerberosPrincipal(name);
@@ -36,7 +38,7 @@ public class SPNegoPrincipal implements Principal {
 
     /**
      *
-     * @return
+     * @return the principal name.
      */
     @Override
     public String getName() {
@@ -46,7 +48,7 @@ public class SPNegoPrincipal implements Principal {
 
     /**
      *
-     * @return
+     * @return the delegated credential.
      */
     public GSSCredential getDelegatedCredential() {
         return delegatedCred;

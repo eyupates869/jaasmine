@@ -162,7 +162,9 @@ export CATALINA_PID
 
 *NOTE:* the path to {{{CATALINA_PID}}} will vary
 
-= Securing Web Services with JAASmine =
+= Applying JAASmine =
+
+== Securing Web Services ==
  # Follow the steps in the [JAASmineUsersGuide#Getting_Started] section for your server.
  # Deploy _jaasmine-core.jar_ with your web application or in the application server's shared/common classloader.
  # Add this servlet filter in your _WEB-INF/web.xml_ file:
@@ -175,9 +177,9 @@ export CATALINA_PID
  # Set up the appropriate filter-mappings for your application's web services.  Be sure to map all the url-patterns to your web services.
  # Restart Tomcat.
 
-= Securing uPortal with JAASmine =
+== Securing uPortal ==
 
-= Securing Kuali Rice with JAASmine =
+== Securing Kuali Rice ==
  # deploy custom rice {{{LoginFilter}}}
  # add JAASmine login filter
  # configure {{{web.xml}}} for rice

@@ -1,5 +1,4 @@
 #summary A guide to common JAASmine use cases.
-#labels Restrict-View-Commit
 
 <wiki:toc max_depth="2"/>
 

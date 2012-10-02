@@ -53,7 +53,11 @@ using ktpass.exe:
  * http://support.microsoft.com/kb/324144
  * http://technet.microsoft.com/en-us/library/cc753771%28v=ws.10%29.aspx
 
-Note: You cannot map multiple service instances to the same user account.
+other points of interest:
+ * There are several quirks and defects in the ktpass utility; however, there is one that has caused us a good deal of grief and deserves mention.  As detailed [here|http://support.microsoft.com/default.aspx?scid=kb;EN-US;939980], using the option to prompt for a password to be used in the keytab is problematic.  In order to achieve the desired result, the password must be entered directly on the command line.
+ * When creating a keytab for a user account, including "-ptype KRB5_NT_PRINCIPAL" will suppress an annoying warning message (something about account types not matching); this message cannot be avoided when generating keytabs for computer accounts.
+ * When creating a keytab for a user account, including "+setupn" and "+setpass" will ensure that the UPN password, SPN password, and keytab passphrase are all set to the same value, allowing ongoing authN success in apps that use those credential combinations (UPN equates to !ActiveDirectory account)
+ * It does not appear that you can map multiple service instances to the same !ActiveDirectory user account.  I believe this is due to the complications of setting and resetting the passwords or pass-phrases associated with each of those individual accounts.  Although there are some differing speculations about this ([seemingly clear support for mapping multiple SPNs to one account|http://msdn.microsoft.com/en-us/library/windows/desktop/ms677601(v=VS.85).aspx], [foggy|http://msdn.microsoft.com/en-us/library/windows/desktop/ms677949(v=VS.85).aspx], [clearly not supporting mapping mutliple SPNs to one account|http://technet.microsoft.com/en-us/library/cc753771(WS.10).aspx]).
 
 == apply the keytab file ==
 After you generate the keytab file, there are three options for applying for use via JAASmin:

@@ -4,10 +4,10 @@
 <wiki:toc max_depth="2"/>
 
 = Getting Started =
-JAASmine use cases may require one or more of the following:
+Services running on UNIX systems can be configured with service instance accounts in !ActiveDirectory; however, unlike Kerberos principal names, !ActiveDirectory account names do not have multiple parts, so it is not possible to directly create an account like HTTP/myservice1.yourdomain.com.  Instead, this is accomplished by using Service Principal Name (SPN) mappings, so JAASmine use cases may require one or more of the following:
 
-== create an ActiveDirectory account ==
-create an ActiveDirectory account using the active directory users and computers administration application.
+== create an !ActiveDirectory account ==
+create an !ActiveDirectory account using the active directory users and computers administration application.
 
 you can create either a computer or user account.  there are no strict rules about when to use either one, but there are some considerations that may lead you to choose one over the other:
  # computer accounts do not have associated passwords, so an authentication credential will require a keytab; whereas user accounts have a traditional principal/password credential that can facilitate interactive authN or programmatic authN like basic auth and otherwise.
@@ -16,10 +16,10 @@ you can create either a computer or user account.  there are no strict rules abo
  # user accounts can be used to login to windows workstations for various purposes, including password changes; therefore, it is important to note that changing a password on a user account will invalidate a keytab, so user accounts with keytabs have a higher risk of inadvertent human error reeking havoc in a way that is not easy to troubleshoot.
 
 other points of interest:
- * all Active
- * the ActiveDirectory account name (NetBIOS name) is limited to 15 characters.  the ActiveDirectory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
+ * all !ActiveDirectory computer accounts are suffixed with the "$" behind the scenes, so when referring to them using command line utilities, the "$" will need to be included.  for example, a computer account created as myservice1 will be referenced in command line utilities as myservice1$.  don't ask me why... stupid! did i say that out loud?
+ * the !ActiveDirectory account name (NetBIOS name) is limited to 15 characters.  the !ActiveDirectory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
 
-== map ActiveDirectory account to Service Principal Name (SPN) ==
+== map !ActiveDirectory account to Service Principal Name (SPN) ==
 create a service principal name (SPN) mapping using the setspn windows command line utility.  it is important to note that the ktpass utility (discussed below) also has options to create this mapping as part of the keytab generation process.
 
 using setspn.exe:
@@ -41,23 +41,26 @@ syntax - setspn -r activedirectory-account
 sample - setspn -r myservice1
 }}}
 
-NOTE: the "reset" mapping function is a bit mysterious.  i believe it is suppose to put the account back to the original creation state with regard to SPN mappings; however, interestingly the reset mapping function adds default SPNs that are not there when the account is created new.  these default mappings are typically not added until the account is bound to the AD (i.e. first connection).
+other points of interest:
+ * the "reset" mapping function is a bit mysterious.  i believe it is suppose to put the account back to the original creation state with regard to SPN mappings; however, interestingly the reset mapping function adds default SPNs that are not there when the account is created new.  these default mappings are typically not added until the account is bound to the AD (i.e. first connection).
+ * Updating SPNs is rarely required (i.e. computer name change, requires the SPNs for installed services to be changed to match it.)
 
 == create a keytab ==
- # create a keytab using the ktpass utility at windows command line (see sample command below).
- # copy keytab to {{{$CATALINA_BASE/conf}}}
+create the Kerberos keytab file using the ktpass windows command line utility to be used by UNIX Kerberos-based systems to define KDC hosts and user/service mappings.  Keytab files can be used in conjunction with a Kerberos account to prove identity in an authentication sequence.  it is important to note that the ktpass utility has options for creating the service principal name (SPN) mapping (also described above).
 
-{{{
-ktpass -princ HTTP/machine-name.yourdomain.edu@AD.YOURDOMAIN.EDU -mapuser YOURREALM\service-username$ -mapop set +rndPass -out s:\path\to\file\service-username.keytab -crypto RC4-HMAC-NT
-}}}
+The ktpass command-line tool enables configuration of a non-Windows server Kerberos service as a security principal in the AD. ktpass configures the server principal name for the host or service in AD and generates an MIT-Kerberos style "keytab" file that contains the shared secret key of the service. The tool allows UNIX-based services that support Kerberos authN to use the interoperability features of the AD Kerberos KDC.  In other words, MIT Kerberos clients and servers on UNIX systems can authenticate against the AD Kerberos server, and clients connected to Windows servers can authenticate to Kerberos services that support GSS API.
 
-*NOTE:* to specify a password, use the -pass parameter (followed by the password), rather than using the +rndPass parameter, which randomly generates one.
+using ktpass.exe:
+- http://support.microsoft.com/kb/324144
+- http://technet.microsoft.com/en-us/library/cc753771%28v=ws.10%29.aspx
 
-*NOTE:* to inspect the SPNs specify the list option on the setspn utility at the windows command line ({{{setspn -L service-username}}}).  The setspn command-line tool allows you to list and update (add, delete, reset) the SPNs directory property for an AD service account. Updating SPNs is rarely required (i.e. computer name change, requires the SPNs for installed services to be changed to match it.)
+Note: You cannot map multiple service instances to the same user account.
 
-*NOTE:* the principal must match to machine name (is this true?)
-
-*NOTE:* the computer account must match the one created above
+== apply the keytab file ==
+After you generate the keytab file, there are three options for applying for use via JAASmin:
+ # replace the default unix keytab (i.e. /etc/krb5.keytab)
+ # merge the new file with the default unix keytab (i.e. /etc/krb5.keytab) using the ktutil unix command line tool.
+ # copy keytab to location (i.e. {{{$CATALINA_BASE/conf}}}) referenced by {{{jaas.conf}}} as described below
 
 == create jaas.conf ==
  # configure {{{jaas.conf}}} to accept SPNego tokens (see sample file below)
@@ -98,8 +101,6 @@ com.sun.security.jgss.krb5.accept {
 
 ...
 }}}
-
-*NOTE:* the keytab file path and name must match one created above
 
 *NOTE:* the principal must match the SPN specified in the keytab created above
 

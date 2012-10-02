@@ -18,8 +18,8 @@ other points of interest:
  * all !ActiveDirectory computer accounts are suffixed with the "$" behind the scenes, so when referring to them using command line utilities, the "$" will need to be included.  for example, a computer account created as myservice1 will be referenced in command line utilities as myservice1$.  don't ask me why... stupid! did i say that out loud?
  * the !ActiveDirectory account name (NetBIOS name) is limited to 15 characters.  the !ActiveDirectory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
 
-== map !ActiveDirectory account to Service Principal Name (SPN) ==
-create a service principal name (SPN) mapping using the setspn windows command line utility.  it is important to note that the ktpass utility (discussed below) also has options to create this mapping as part of the keytab generation process.
+== map Account to SPN ==
+create a service principal name (SPN) mapping (to an !ActiveDirectory acount) using the setspn windows command line utility.  it is important to note that the ktpass utility (discussed below) also has options to create this mapping as part of the keytab generation process.
 
 using setspn.exe:
 {{{

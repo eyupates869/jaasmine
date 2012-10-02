@@ -195,3 +195,18 @@ export CATALINA_PID
 
 ...
 }}}
+
+= Supporting and Otherwise Interesting References =
+ * http://technet.microsoft.com/en-us/library/bb742433.aspx
+ * https://wiki.cites.uiuc.edu/wiki/x/GSZkAg
+ * http://www.ietf.org/rfc/rfc4559.txt
+ * http://docs.oracle.com/javase/6/docs/technotes/guides/security/jgss/lab/part5.html
+ * http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/index.jsp?topic=/com.ibm.websphere.express.doc/info/exp/ae/tsec_SPNEGO_token.html
+ * http://docs.oracle.com/javase/1.4.2/docs/guide/security/jaas/spec/
+ * http://www.drdobbs.com/ssh-kerberos-authentication-using-gssapi/184402071
+ * http://docs.oracle.com/javase/1.5.0/docs/guide/security/jgss/tutorials/BasicClientServer.html
+ * http://stackoverflow.com/questions/435091/is-a-service-principal-name-spn-bound-to-a-specific-machine
+ * http://msdn.microsoft.com/en-us/library/ms995352.aspx
+ * http://support.microsoft.com/kb/929650
+ * http://blog.msfirewall.org.uk/2008/07/publishing-exchange-2007-services-with.html
+ * http://s2.diffuse.it/blog/show/6602-SPNEGO_authentication_and_credential_delegation_with_Java

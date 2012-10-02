@@ -4,15 +4,44 @@
 <wiki:toc max_depth="2"/>
 
 = Getting Started =
-All JAASmine use cases share a few fundamental requirements:
-== create a SPN ==
-create a service principal name (SPN) using the active directory users and computers administration application.  we recommend creating a computer account with a non-expiring password.
+JAASmine use cases may require one or more of the following:
 
-*NOTE:* SPNs are used to locate a target principal name for running a service.
+== create an ActiveDirectory account ==
+create an ActiveDirectory account using the active directory users and computers administration application.
 
-*NOTE:* the computer name (NetBIOS name) is limited to 15 characters.  the active directory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
+you can create either a computer or user account.  there are no strict rules about when to use either one, but there are some considerations that may lead you to choose one over the other:
+ # computer accounts do not have associated passwords, so an authentication credential will require a keytab; whereas user accounts have a traditional principal/password credential that can facilitate interactive authN or programmatic authN like basic auth and otherwise.
+ # computer accounts have a minimal number of attributes; whereas user accounts have many associated attributes like firstname, lastname, middlename, emailaddress, etc.  some automation accounts may not have sensible values for these attributes (although, some of them can be left blank, as we'll demonstrate later).
+ # computer accounts do not support the des-cbc-md5 encryption type; when your service requires this type, you must choose a user account.
+ # user accounts can be used to login to windows workstations for various purposes, including password changes; therefore, it is important to note that changing a password on a user account will invalidate a keytab, so user accounts with keytabs have a higher risk of inadvertent human error reeking havoc in a way that is not easy to troubleshoot.
 
-*NOTE:* when needing to use encryption type des-cbc-md5, you should create a user account rather than a computer account, as this cannot be set for a computer type account
+other points of interest:
+ * all Active
+ * the ActiveDirectory account name (NetBIOS name) is limited to 15 characters.  the ActiveDirectory users and computers administration application will allow you to create longer names; however, you will need to use the truncated "pre-Windows 2000" name when using the ktpass, setspn, and other command line utilities.  therefore, we recommend adhering to the 15 character limit to avoid confusion.
+
+== map ActiveDirectory account to Service Principal Name (SPN) ==
+create a service principal name (SPN) mapping using the setspn windows command line utility.  it is important to note that the ktpass utility (discussed below) also has options to create this mapping as part of the keytab generation process.
+
+using setspn.exe:
+{{{
+LIST (inspect) MAPPINGS:
+syntax - setspn -l activedirectory-account
+sample - setspn -l myservice1
+
+ADD new MAPPING:
+syntax - setspn -a service/host.yourdomain.com activedirectory-account
+sample - setspn -a ldap/service.yourdomain.com myservice1
+
+REMOVE existing MAPPING:
+syntax - setspn -d service/host.yourdomain.com activedirectory-account
+sample - setspn -d ldap/service.yourdomain.com myservice1
+
+RESET MAPPINGS:
+syntax - setspn -r activedirectory-account
+sample - setspn -r myservice1
+}}}
+
+NOTE: the "reset" mapping function is a bit mysterious.  i believe it is suppose to put the account back to the original creation state with regard to SPN mappings; however, interestingly the reset mapping function adds default SPNs that are not there when the account is created new.  these default mappings are typically not added until the account is bound to the AD (i.e. first connection).
 
 == create a keytab ==
  # create a keytab using the ktpass utility at windows command line (see sample command below).

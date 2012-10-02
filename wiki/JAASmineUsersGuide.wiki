@@ -51,8 +51,8 @@ create the Kerberos keytab file using the ktpass windows command line utility to
 The ktpass command-line tool enables configuration of a non-Windows server Kerberos service as a security principal in the AD. ktpass configures the server principal name for the host or service in AD and generates an MIT-Kerberos style "keytab" file that contains the shared secret key of the service. The tool allows UNIX-based services that support Kerberos authN to use the interoperability features of the AD Kerberos KDC.  In other words, MIT Kerberos clients and servers on UNIX systems can authenticate against the AD Kerberos server, and clients connected to Windows servers can authenticate to Kerberos services that support GSS API.
 
 using ktpass.exe:
-- http://support.microsoft.com/kb/324144
-- http://technet.microsoft.com/en-us/library/cc753771%28v=ws.10%29.aspx
+ * http://support.microsoft.com/kb/324144
+ * http://technet.microsoft.com/en-us/library/cc753771%28v=ws.10%29.aspx
 
 Note: You cannot map multiple service instances to the same user account.
 

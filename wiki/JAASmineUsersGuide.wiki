@@ -180,8 +180,12 @@ export CATALINA_PID
 == Securing uPortal ==
 
 == Securing Kuali Rice ==
- # deploy custom rice {{{LoginFilter}}}
- # add JAASmine login filter
+ # add JAAS & krb5 config for accepting SPNego tokens
+ # add a keytab file
+ # update setenv.sh to take the system props needed for krb5 authn
+ # disable Location directive for Apache/Bluestem
+ # De(velop/ploy) custom rice {{{LoginFilter}}}
+ # add {{{JAASmine}}} login filter
  # configure {{{web.xml}}} for rice
  # update {{{rice-config.xml}}} to use the {{{LoginFilter}}} (see sample file below)
  # restart tomcat

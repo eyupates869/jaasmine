@@ -14,92 +14,83 @@ import com.logiclander.jaasmine.authentication.SimpleAuthenticationService;
 
 class BasicHttpAuthorizor extends BaseHttpAuthorizor {
 
-	private final String appName;
+    private final String appName;
 
-	private final Subject subject;
+    private final Subject subject;
 
-	BasicHttpAuthorizor(HttpServletRequest httpRequest) {
-		super(httpRequest);
-		this.appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
-		this.subject = createSubject();
-	}
+    BasicHttpAuthorizor(HttpServletRequest httpRequest) {
+        super(httpRequest);
+        this.appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
+        this.subject = createSubject();
+    }
 
-	BasicHttpAuthorizor(HttpServletRequest httpRequest, String realmName) {
-		super(httpRequest, realmName);
-		this.appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
-		this.subject = createSubject();
-	}
+    BasicHttpAuthorizor(HttpServletRequest httpRequest, String realmName) {
+        super(httpRequest, realmName);
+        this.appName = AuthenticationService.DEFAULT_JAASMINE_LOGIN_CONFIG;
+        this.subject = createSubject();
+    }
 
-	BasicHttpAuthorizor(HttpServletRequest httpRequest, String realmName, String appName) {
-		super(httpRequest, realmName);
-		this.appName = appName;
-		this.subject = createSubject();
-	}
+    BasicHttpAuthorizor(HttpServletRequest httpRequest, String realmName,
+            String appName) {
+        super(httpRequest, realmName);
+        this.appName = appName;
+        this.subject = createSubject();
+    }
 
+    private Subject createSubject() {
+        List<String> credentials = getUsernamePasswordCreds(decodeAuthTokenCredentials());
 
-	private Subject createSubject() {
-		List<String> credentials =
-			getUsernamePasswordCreds(decodeAuthTokenCredentials());
+        return doLogin(credentials);
+    }
 
-		return doLogin(credentials);
-	}
+    private String decodeAuthTokenCredentials() {
+        return new String(Base64.decodeBase64(authorizationToken()));
+    }
 
-	private String decodeAuthTokenCredentials() {
-		return new String(Base64.decodeBase64(authorizationToken()));
-	}
+    private List<String> getUsernamePasswordCreds(String decodedCredential) {
 
+        ImmutableList.Builder<String> decodedCreds = ImmutableList.builder();
+        for (String decodedCred : decodedCredential.split(":")) {
+            decodedCreds.add(decodedCred);
+        }
 
-	private List<String> getUsernamePasswordCreds(String decodedCredential) {
+        if (decodedCreds.build().size() < 2) {
+            decodedCreds.add("");
+        }
 
-		ImmutableList.Builder<String> decodedCreds = ImmutableList.builder();
-		for (String decodedCred : decodedCredential.split(":")) {
-			decodedCreds.add(decodedCred);
-		}
+        return decodedCreds.build();
+    }
 
-		if (decodedCreds.build().size() < 2) {
-			decodedCreds.add("");
-		}
+    private Subject doLogin(List<String> usernamePassword) {
 
-		if (httpAuthorizorLogger.isDebugEnabled()) {
-			httpAuthorizorLogger.debug(decodedCreds.build());
-		}
+        HttpSession session = getHttpRequest().getSession();
 
-		return decodedCreds.build();
-	}
+        Subject subj = (Subject) session
+                .getAttribute(AuthenticationService.SUBJECT_KEY);
 
+        if (subj == null) {
+            AuthenticationService authnSvc = new SimpleAuthenticationService(
+                    appName);
 
-	private Subject doLogin(List<String> usernamePassword) {
+            subj = authnSvc.login(usernamePassword.get(0), usernamePassword
+                    .get(1).toCharArray());
 
-		HttpSession session = getHttpRequest().getSession();
+            if (subj != null) {
+                session.setAttribute(AuthenticationService.SUBJECT_KEY, subj);
+            }
+        }
 
-		Subject subj =
-			(Subject) session.getAttribute(AuthenticationService.SUBJECT_KEY);
+        return subj;
+    }
 
-		if (subj == null) {
-			AuthenticationService authnSvc =
-				new SimpleAuthenticationService(appName);
+    @Override
+    public HttpServletRequest getAuthorizedHttpRequest() {
+        return new JaasmineHttpServletRequest(getHttpRequest(), subject);
+    }
 
-			subj = authnSvc.login(
-					usernamePassword.get(0),
-					usernamePassword.get(1).toCharArray()
-				);
-
-			if (subj != null) {
-				session.setAttribute(AuthenticationService.SUBJECT_KEY, subj);
-			}
-		}
-
-		return subj;
-	}
-
-	@Override
-	public HttpServletRequest getAuthorizedHttpRequest() {
-		return new JaasmineHttpServletRequest(getHttpRequest(), subject);
-	}
-
-	@Override
-	public boolean isAuthorized() {
-		return subject != null;
-	}
+    @Override
+    public boolean isAuthorized() {
+        return subject != null;
+    }
 
 }
